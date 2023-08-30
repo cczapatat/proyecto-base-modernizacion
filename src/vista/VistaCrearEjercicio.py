@@ -86,7 +86,7 @@ class VistaCrearEjercicio(QDialog):
             self.texto_nombre.setText(ejercicio["nombre"])
             self.texto_descripcion.setText(ejercicio["descripcion"])
             self.texto_enlace.setText(ejercicio["youtube"])
-            self.texto_calorias.setText(ejercicio["calorias"])
+            self.texto_calorias.setText(str(ejercicio["calorias"]))
 
     def guardar(self):
         """
