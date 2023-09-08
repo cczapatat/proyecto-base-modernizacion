@@ -1,6 +1,10 @@
 from src.logica.FachadaEnForma import FachadaEnForma
+from src.modelo.declarative_base import session
 
 import validators
+
+from src.modelo.ejercicio import Ejercicio
+
 
 class LogicaEnForma(FachadaEnForma):
 
@@ -37,5 +41,10 @@ class LogicaEnForma(FachadaEnForma):
 
         if calorias <= 0:
             return "Error, el campo calorias debe ser mayor a cero"
+
+        busqueda = session.query(Ejercicio).filter(Ejercicio.nombre == nombre).all()
+
+        if len(busqueda) > 0:
+            return "Error, el ejericio "+nombre+" ya existe"
 
         return ""
