@@ -93,6 +93,11 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         for ejercicio in ejercicios:
             self.session.delete(ejercicio)
 
+        personas = self.session.query(Persona).all()
+
+        for persona in personas:
+            self.session.delete(persona)
+
         self.session.commit()
         self.session.close()
 
