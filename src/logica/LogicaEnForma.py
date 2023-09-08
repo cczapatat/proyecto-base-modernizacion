@@ -1,3 +1,5 @@
+from sqlalchemy import asc
+
 from src.logica.FachadaEnForma import FachadaEnForma
 from src.modelo.declarative_base import session
 
@@ -58,4 +60,4 @@ class LogicaEnForma(FachadaEnForma):
         return True
 
     def dar_ejercicios(self):
-        return session.query(Ejercicio).all()
+        return session.query(Ejercicio).order_by(asc("nombre")).all()
