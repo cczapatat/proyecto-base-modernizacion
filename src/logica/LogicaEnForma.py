@@ -65,4 +65,4 @@ class LogicaEnForma(FachadaEnForma):
         return session.query(Ejercicio).order_by(asc("nombre")).all()
 
     def dar_personas(self):
-        return session.query(Persona).all()
+        return session.query(Persona).order_by(asc("nombre")).all()
