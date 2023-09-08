@@ -83,6 +83,8 @@ class LogicaEnFormaTestCase(unittest.TestCase):
                 medidaCintura=self.personas_data[i][8],
             ))
 
+        self.personas_data_sorted = sorted(self.personas_data, key=lambda persona: persona[0])
+
     def tearDown(self):
         self.logica = None
 
@@ -170,4 +172,18 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
     def test_listar_personas(self):
         personas = self.logica.dar_personas()
+        self.assertEqual(len(personas), 5)
+
+    def test_listar_personas_ordernados_por_nombre_asc(self):
+        personas = self.logica.dar_personas()
+        for persona, data_sorted in zip(personas, self.personas_data_sorted):
+            self.assertEqual(data_sorted[0], persona.nombre)
+            self.assertEqual(data_sorted[1], persona.apellidos)
+            self.assertEqual(data_sorted[2], persona.talla)
+            self.assertEqual(data_sorted[3], persona.peso)
+            self.assertEqual(data_sorted[4], persona.edad)
+            self.assertEqual(data_sorted[5], persona.medidaBrazo)
+            self.assertEqual(data_sorted[6], persona.medidaPierna)
+            self.assertEqual(data_sorted[7], persona.medidaPecho)
+            self.assertEqual(data_sorted[8], persona.medidaCintura)
         self.assertEqual(len(personas), 5)
