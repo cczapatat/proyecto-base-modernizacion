@@ -1,14 +1,38 @@
 import unittest
 
 from src.logica.LogicaEnForma import LogicaEnForma
+from src.modelo.declarative_base import Session
+from src.modelo.ejercicio import Ejercicio
 
 class LogicaEnFormaTestCase(unittest.TestCase):
 
     def setUp(self):
         self.logica = LogicaEnForma()
 
+        self.session = Session()
+
+        '''Se crea ejericio base'''
+        ejercicio = Ejercicio(
+            nombre="Salto Lazo",
+            descripcion="Saltar y saltar",
+            enlaceYoutube="https://www.youtube.com/watch?v=bmNGEzHi4-s",
+            caloriasPorRepeticion=20,
+        )
+        self.session.add(ejercicio)
+        self.session.commit()
+
     def tearDown(self):
         self.logica = None
+
+        self.session = Session()
+
+        ejercicios = self.session.query(Ejercicio).all()
+
+        for ejercicio in ejercicios:
+            self.session.delete(ejercicio)
+
+        self.session.commit()
+        self.session.close()
 
     def test_validar_ejercicio_nombre_vacio(self):
         resultado = self.logica.validar_crear_editar_ejercicio("", "", "", 0)
@@ -45,3 +69,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def test_validar_ejercicio_calorias_no_es_mayor_a_cero(self):
         resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://www.youtube.com/watch?v=bmNGEzHi4-s", -1)
         self.assertEqual(resultado, "Error, el campo calorias debe ser mayor a cero")
+
+    def test_validar_ejercicio_nombre_duplicado(self):
+        resultado = self.logica.validar_crear_editar_ejercicio("Salto Lazo", "Saltar 15 veces", "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
+        self.assertEqual(resultado, "Error, el ejericio Salto Lazo ya existe")
