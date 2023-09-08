@@ -1,12 +1,14 @@
 import unittest
 
 from src.logica.LogicaEnForma import LogicaEnForma
-from src.modelo.declarative_base import Session
+from src.modelo.declarative_base import Session, Base, engine
 from src.modelo.ejercicio import Ejercicio
 
 class LogicaEnFormaTestCase(unittest.TestCase):
 
     def setUp(self):
+        Base.metadata.create_all(engine)
+
         self.logica = LogicaEnForma()
 
         self.session = Session()
