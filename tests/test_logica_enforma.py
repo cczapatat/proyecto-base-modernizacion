@@ -1,4 +1,5 @@
 import unittest
+from faker import Faker
 
 from src.logica.LogicaEnForma import LogicaEnForma
 from src.modelo.declarative_base import Session, Base, engine
@@ -12,15 +13,38 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.logica = LogicaEnForma()
 
         self.session = Session()
+        self.data_faker = Faker()
+
+        self.ejercicios_data = []
+        self.ejercicios_data.append((
+            "Salto Lazo",
+            "Saltar y saltar",
+            "https://www.youtube.com/watch?v=bmNGEzHi4-s",
+            20,
+        ))
 
         '''Se crea ejericio base'''
-        ejercicio = Ejercicio(
-            nombre="Salto Lazo",
-            descripcion="Saltar y saltar",
-            enlaceYoutube="https://www.youtube.com/watch?v=bmNGEzHi4-s",
-            caloriasPorRepeticion=20,
-        )
-        self.session.add(ejercicio)
+        self.session.add(Ejercicio(
+            nombre=self.ejercicios_data[0][0],
+            descripcion=self.ejercicios_data[0][1],
+            enlaceYoutube=self.ejercicios_data[0][2],
+            caloriasPorRepeticion=int(self.ejercicios_data[0][3]),
+        ))
+
+        for i in range(0,5):
+            self.ejercicios_data.append((
+                self.data_faker.unique.name(),
+                self.data_faker.text(max_nb_chars=250),
+                "https://www.youtube.com/watch?" + self.data_faker.name(),
+                self.data_faker.random_int(10, 1000),
+            ))
+            self.session.add(Ejercicio(
+                nombre=self.ejercicios_data[i+1][0],
+                descripcion=self.ejercicios_data[i+1][1],
+                enlaceYoutube=self.ejercicios_data[i+1][2],
+                caloriasPorRepeticion=int(self.ejercicios_data[i+1][3]),
+            ))
+
         self.session.commit()
 
     def tearDown(self):
@@ -89,3 +113,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(ejercicio.descripcion, "Salto y Flexion")
         self.assertEqual(ejercicio.enlaceYoutube, "https://www.youtube.com/watch?v=bmNGEzHi4-s")
         self.assertEqual(ejercicio.caloriasPorRepeticion, 10)
+
+    def test_listar_ejercicios(self):
+        ejercicios = self.logica.dar_ejercicios()
+        self.assertEqual(len(ejercicios), 6)
