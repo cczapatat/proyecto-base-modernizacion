@@ -56,3 +56,6 @@ class LogicaEnForma(FachadaEnForma):
         session.commit()
 
         return True
+
+    def dar_ejercicios(self):
+        return session.query(Ejercicio).all()
