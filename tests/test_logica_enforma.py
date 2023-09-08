@@ -33,3 +33,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def test_validar_ejercicio_calorias_incorrectas(self):
         resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://www.youtube.com/watch?v=bmNGEzHi4-s", "")
         self.assertEqual(resultado, "Error, el campo calorias debe ser un número entero")
+
+    def test_validar_ejercicio_calorias_no_es_mayor_a_cero(self):
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://www.youtube.com/watch?v=bmNGEzHi4-s", -1)
+        self.assertEqual(resultado, "Error, el campo calorias debe ser mayor a cero")
