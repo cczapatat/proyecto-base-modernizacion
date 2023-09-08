@@ -6,6 +6,8 @@ from src.modelo.declarative_base import session
 import validators
 
 from src.modelo.ejercicio import Ejercicio
+from src.modelo.persona import Persona
+
 
 
 class LogicaEnForma(FachadaEnForma):
@@ -61,3 +63,6 @@ class LogicaEnForma(FachadaEnForma):
 
     def dar_ejercicios(self):
         return session.query(Ejercicio).order_by(asc("nombre")).all()
+
+    def dar_personas(self):
+        return session.query(Persona).order_by(asc("nombre")).all()
