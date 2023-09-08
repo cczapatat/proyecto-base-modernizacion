@@ -10,4 +10,7 @@ class LogicaEnForma(FachadaEnForma):
         if len(nombre) == 0:
             return "Error, el campo nombre esta vacio"
 
+        if len(descripcion) == 0:
+            return "Error, el campo descripcion esta vacio"
+
         return ""
