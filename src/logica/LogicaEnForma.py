@@ -15,13 +15,13 @@ class LogicaEnForma(FachadaEnForma):
         if len(nombre) == 0:
             return "Error, el campo nombre esta vacio"
 
-        if len(nombre) >40:
+        if len(nombre) > 40:
             return "Error, el campo nombre supera los 40 caracteres"
 
         if len(descripcion) == 0:
             return "Error, el campo descripcion esta vacio"
 
-        if len(descripcion) >250:
+        if len(descripcion) > 250:
             return "Error, el campo descripcion supera los 250 caracteres"
 
         if len(enlace) == 0:
@@ -45,6 +45,14 @@ class LogicaEnForma(FachadaEnForma):
         busqueda = session.query(Ejercicio).filter(Ejercicio.nombre == nombre).all()
 
         if len(busqueda) > 0:
-            return "Error, el ejericio "+nombre+" ya existe"
+            return "Error, el ejericio " + nombre + " ya existe"
 
         return ""
+
+    def crear_ejercicio(self, nombre, descripcion, enlace, calorias):
+        ejercicio = Ejercicio(nombre=nombre, descripcion=descripcion, enlaceYoutube=enlace,
+                              caloriasPorRepeticion=calorias)
+        session.add(ejercicio)
+        session.commit()
+
+        return True
