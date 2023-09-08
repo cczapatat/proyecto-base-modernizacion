@@ -45,6 +45,8 @@ class LogicaEnFormaTestCase(unittest.TestCase):
                 caloriasPorRepeticion=int(self.ejercicios_data[i+1][3]),
             ))
 
+        self.ejercicios_data_sorted = sorted(self.ejercicios_data, key=lambda ejercicio: ejercicio[0])
+
         self.session.commit()
 
     def tearDown(self):
@@ -116,4 +118,13 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
     def test_listar_ejercicios(self):
         ejercicios = self.logica.dar_ejercicios()
+        self.assertEqual(len(ejercicios), 6)
+
+    def test_listar_ejercicios_ordernados_por_nombre_asc(self):
+        ejercicios = self.logica.dar_ejercicios()
+        for ejercicio, data_sorted in zip(ejercicios, self.ejercicios_data_sorted):
+            self.assertEqual(data_sorted[0], ejercicio.nombre)
+            self.assertEqual(data_sorted[1], ejercicio.descripcion)
+            self.assertEqual(data_sorted[2], ejercicio.enlaceYoutube)
+            self.assertEqual(data_sorted[3], ejercicio.caloriasPorRepeticion)
         self.assertEqual(len(ejercicios), 6)
