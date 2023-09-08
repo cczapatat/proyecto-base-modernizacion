@@ -1,9 +1,11 @@
+import datetime
 import unittest
 from faker import Faker
 
 from src.logica.LogicaEnForma import LogicaEnForma
 from src.modelo.declarative_base import Session, Base, engine
 from src.modelo.ejercicio import Ejercicio
+from src.modelo.persona import Persona
 
 class LogicaEnFormaTestCase(unittest.TestCase):
 
@@ -15,6 +17,12 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.session = Session()
         self.data_faker = Faker()
 
+        self.init_ejercicios()
+        self.init_personas()
+
+        self.session.commit()
+
+    def init_ejercicios(self):
         self.ejercicios_data = []
         self.ejercicios_data.append((
             "Salto Lazo",
@@ -31,7 +39,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             caloriasPorRepeticion=int(self.ejercicios_data[0][3]),
         ))
 
-        for i in range(0,5):
+        for i in range(0, 5):
             self.ejercicios_data.append((
                 self.data_faker.unique.name(),
                 self.data_faker.text(max_nb_chars=250),
@@ -39,15 +47,41 @@ class LogicaEnFormaTestCase(unittest.TestCase):
                 self.data_faker.random_int(10, 1000),
             ))
             self.session.add(Ejercicio(
-                nombre=self.ejercicios_data[i+1][0],
-                descripcion=self.ejercicios_data[i+1][1],
-                enlaceYoutube=self.ejercicios_data[i+1][2],
-                caloriasPorRepeticion=int(self.ejercicios_data[i+1][3]),
+                nombre=self.ejercicios_data[i + 1][0],
+                descripcion=self.ejercicios_data[i + 1][1],
+                enlaceYoutube=self.ejercicios_data[i + 1][2],
+                caloriasPorRepeticion=int(self.ejercicios_data[i + 1][3]),
             ))
 
         self.ejercicios_data_sorted = sorted(self.ejercicios_data, key=lambda ejercicio: ejercicio[0])
 
-        self.session.commit()
+    def init_personas(self):
+        self.personas_data = []
+
+        for i in range(0, 5):
+            self.personas_data.append((
+                self.data_faker.unique.first_name(),
+                self.data_faker.unique.last_name(),
+                self.data_faker.random_int(10, 1000),
+                self.data_faker.random_int(10, 1000),
+                self.data_faker.random_int(10, 100),
+                self.data_faker.random_int(10, 1000),
+                self.data_faker.random_int(10, 1000),
+                self.data_faker.random_int(10, 1000),
+                self.data_faker.random_int(10, 1000),
+            ))
+            self.session.add(Persona(
+                nombre=self.personas_data[i][0],
+                apellidos=self.personas_data[i][1],
+                fechaInicio=datetime.date.today(),
+                talla=self.personas_data[i][2],
+                peso=self.personas_data[i][3],
+                edad=self.personas_data[i][4],
+                medidaBrazo=self.personas_data[i][5],
+                medidaPierna=self.personas_data[i][6],
+                medidaPecho=self.personas_data[i][7],
+                medidaCintura=self.personas_data[i][8],
+            ))
 
     def tearDown(self):
         self.logica = None
@@ -128,3 +162,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             self.assertEqual(data_sorted[2], ejercicio.enlaceYoutube)
             self.assertEqual(data_sorted[3], ejercicio.caloriasPorRepeticion)
         self.assertEqual(len(ejercicios), 6)
+
+    def test_listar_personas(self):
+        personas = self.logica.dar_personas()
+        self.assertEqual(len(personas), 5)
