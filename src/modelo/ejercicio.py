@@ -8,5 +8,5 @@ class Ejercicio(Base):
     id = Column(Integer, primary_key=True)
     nombre = Column(String)
     descripcion = Column(String)
-    caloriasPorRepeticion = Column(Integer)
-    enlaceYoutube = Column(String)
+    calorias = Column(Integer)
+    youtube = Column(String)

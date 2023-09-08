@@ -8,8 +8,6 @@ import validators
 from src.modelo.ejercicio import Ejercicio
 from src.modelo.persona import Persona
 
-
-
 class LogicaEnForma(FachadaEnForma):
 
     def __init__(self):
@@ -39,10 +37,10 @@ class LogicaEnForma(FachadaEnForma):
         elif "https://www.youtube.com/" not in enlace:
             error = "Error, el campo enlace no es de Youtube"
 
-        elif type(calorias) != int:
-            error = "Error, el campo calorias debe ser un número entero"
+        #elif type(calorias) != int:
+         #   error = "Error, el campo calorias debe ser un número entero"
 
-        elif calorias <= 0:
+        elif int(calorias) <= 0:
             error = "Error, el campo calorias debe ser mayor a cero"
 
         else:
@@ -54,15 +52,25 @@ class LogicaEnForma(FachadaEnForma):
         return error
 
     def crear_ejercicio(self, nombre, descripcion, enlace, calorias):
-        ejercicio = Ejercicio(nombre=nombre, descripcion=descripcion, enlaceYoutube=enlace,
-                              caloriasPorRepeticion=calorias)
+        ejercicio = Ejercicio(nombre=nombre, descripcion=descripcion, youtube=enlace,
+                              calorias=calorias)
         session.add(ejercicio)
         session.commit()
 
         return True
 
     def dar_ejercicios(self):
-        return session.query(Ejercicio).order_by(asc("nombre")).all()
+        ejercicios = session.query(Ejercicio).order_by(asc("nombre")).all()
+        result = []
+        for ejercicio in ejercicios:
+            result.append(ejercicio.__dict__)
+
+        return result
 
     def dar_personas(self):
-        return session.query(Persona).order_by(asc("nombre")).all()
+        personas = session.query(Persona).order_by(asc("nombre")).all()
+        result = []
+        for persona in personas:
+            result.append(persona.__dict__)
+
+        return result

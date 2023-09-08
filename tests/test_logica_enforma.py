@@ -35,8 +35,8 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.session.add(Ejercicio(
             nombre=self.ejercicios_data[0][0],
             descripcion=self.ejercicios_data[0][1],
-            enlaceYoutube=self.ejercicios_data[0][2],
-            caloriasPorRepeticion=int(self.ejercicios_data[0][3]),
+            youtube=self.ejercicios_data[0][2],
+            calorias=int(self.ejercicios_data[0][3]),
         ))
 
         for i in range(0, 5):
@@ -49,8 +49,8 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             self.session.add(Ejercicio(
                 nombre=self.ejercicios_data[i + 1][0],
                 descripcion=self.ejercicios_data[i + 1][1],
-                enlaceYoutube=self.ejercicios_data[i + 1][2],
-                caloriasPorRepeticion=int(self.ejercicios_data[i + 1][3]),
+                youtube=self.ejercicios_data[i + 1][2],
+                calorias=int(self.ejercicios_data[i + 1][3]),
             ))
 
         self.ejercicios_data_sorted = sorted(self.ejercicios_data, key=lambda ejercicio: ejercicio[0])
@@ -72,15 +72,15 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             ))
             self.session.add(Persona(
                 nombre=self.personas_data[i][0],
-                apellidos=self.personas_data[i][1],
-                fechaInicio=datetime.date.today(),
+                apellido=self.personas_data[i][1],
+                fecha_inicio=datetime.date.today().strftime("%Y-%m-%d"),
                 talla=self.personas_data[i][2],
                 peso=self.personas_data[i][3],
                 edad=self.personas_data[i][4],
-                medidaBrazo=self.personas_data[i][5],
-                medidaPierna=self.personas_data[i][6],
-                medidaPecho=self.personas_data[i][7],
-                medidaCintura=self.personas_data[i][8],
+                brazo=self.personas_data[i][5],
+                pierna=self.personas_data[i][6],
+                pecho=self.personas_data[i][7],
+                cintura=self.personas_data[i][8],
             ))
 
         self.personas_data_sorted = sorted(self.personas_data, key=lambda persona: persona[0])
@@ -151,11 +151,11 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def test_crear_ejercicio(self):
         self.logica.crear_ejercicio("Burpies", "Salto y Flexion", "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
 
-        ejercicio =  self.session.query(Ejercicio).filter(Ejercicio.nombre == "Burpies").first()
-        self.assertEqual(ejercicio.nombre, "Burpies")
-        self.assertEqual(ejercicio.descripcion, "Salto y Flexion")
-        self.assertEqual(ejercicio.enlaceYoutube, "https://www.youtube.com/watch?v=bmNGEzHi4-s")
-        self.assertEqual(ejercicio.caloriasPorRepeticion, 10)
+        ejercicio =  self.session.query(Ejercicio).filter(Ejercicio.nombre == "Burpies").first().__dict__
+        self.assertEqual(ejercicio["nombre"], "Burpies")
+        self.assertEqual(ejercicio["descripcion"], "Salto y Flexion")
+        self.assertEqual(ejercicio["youtube"], "https://www.youtube.com/watch?v=bmNGEzHi4-s")
+        self.assertEqual(ejercicio["calorias"], 10)
 
     def test_listar_ejercicios(self):
         ejercicios = self.logica.dar_ejercicios()
@@ -164,10 +164,10 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def test_listar_ejercicios_ordernados_por_nombre_asc(self):
         ejercicios = self.logica.dar_ejercicios()
         for ejercicio, data_sorted in zip(ejercicios, self.ejercicios_data_sorted):
-            self.assertEqual(data_sorted[0], ejercicio.nombre)
-            self.assertEqual(data_sorted[1], ejercicio.descripcion)
-            self.assertEqual(data_sorted[2], ejercicio.enlaceYoutube)
-            self.assertEqual(data_sorted[3], ejercicio.caloriasPorRepeticion)
+            self.assertEqual(data_sorted[0], ejercicio["nombre"])
+            self.assertEqual(data_sorted[1], ejercicio["descripcion"])
+            self.assertEqual(data_sorted[2], ejercicio["youtube"])
+            self.assertEqual(data_sorted[3], ejercicio["calorias"])
         self.assertEqual(len(ejercicios), 6)
 
     def test_listar_personas(self):
@@ -177,13 +177,13 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def test_listar_personas_ordernados_por_nombre_asc(self):
         personas = self.logica.dar_personas()
         for persona, data_sorted in zip(personas, self.personas_data_sorted):
-            self.assertEqual(data_sorted[0], persona.nombre)
-            self.assertEqual(data_sorted[1], persona.apellidos)
-            self.assertEqual(data_sorted[2], persona.talla)
-            self.assertEqual(data_sorted[3], persona.peso)
-            self.assertEqual(data_sorted[4], persona.edad)
-            self.assertEqual(data_sorted[5], persona.medidaBrazo)
-            self.assertEqual(data_sorted[6], persona.medidaPierna)
-            self.assertEqual(data_sorted[7], persona.medidaPecho)
-            self.assertEqual(data_sorted[8], persona.medidaCintura)
+            self.assertEqual(data_sorted[0], persona["nombre"])
+            self.assertEqual(data_sorted[1], persona["apellido"])
+            self.assertEqual(data_sorted[2], persona["talla"])
+            self.assertEqual(data_sorted[3], persona["peso"])
+            self.assertEqual(data_sorted[4], persona["edad"])
+            self.assertEqual(data_sorted[5], persona["brazo"])
+            self.assertEqual(data_sorted[6], persona["pierna"])
+            self.assertEqual(data_sorted[7], persona["pecho"])
+            self.assertEqual(data_sorted[8], persona["cintura"])
         self.assertEqual(len(personas), 5)

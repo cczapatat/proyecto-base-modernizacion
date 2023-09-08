@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, REAL
+from sqlalchemy import Column, Integer, String, REAL
 
 from .declarative_base import Base
 
@@ -7,14 +7,14 @@ class Persona(Base):
 
     id = Column(Integer, primary_key=True)
     nombre = Column(String)
-    apellidos = Column(String)
-    fechaInicio = Column(Date)
-    fechaFin = Column(Date)
-    razonFin = Column(String)
+    apellido = Column(String)
+    fecha_inicio = Column(String)
+    fecha_retiro = Column(String)
+    razon_retiro = Column(String)
     talla = Column(REAL)
     peso = Column(REAL)
     edad = Column(Integer)
-    medidaBrazo = Column(Integer)
-    medidaPierna = Column(Integer)
-    medidaPecho = Column(Integer)
-    medidaCintura = Column(Integer)
+    brazo = Column(Integer)
+    pierna = Column(Integer)
+    pecho = Column(Integer)
+    cintura = Column(Integer)
