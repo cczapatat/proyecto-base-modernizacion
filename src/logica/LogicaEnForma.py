@@ -23,7 +23,10 @@ class LogicaEnForma(FachadaEnForma):
         if not validators.url(enlace):
             return "Error, el campo enlace es incorrecto"
 
-        if "https://youtube.com/" not in enlace:
+        if "https://www.youtube.com/" not in enlace:
             return "Error, el campo enlace no es de Youtube"
+
+        if type(calorias) != int:
+            return "Error, el campo calorias debe ser un número entero"
 
         return ""
