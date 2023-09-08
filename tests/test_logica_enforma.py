@@ -25,3 +25,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def test_validar_ejercicio_enlace_incorrecto(self):
         resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "incorrecto", 0)
         self.assertEqual(resultado, "Error, el campo enlace es incorrecto")
+
+    def test_validar_ejercicio_enlace_no_es_youtube(self):
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://google.com/any", 0)
+        self.assertEqual(resultado, "Error, el campo enlace no es de Youtube")
