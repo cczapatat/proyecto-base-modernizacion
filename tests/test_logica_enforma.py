@@ -14,6 +14,10 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         resultado = self.logica.validar_crear_editar_ejercicio("", "", "", 0)
         self.assertEqual(resultado, "Error, el campo nombre esta vacio")
 
+    def test_validar_ejercicio_nombre_superar_longitud(self):
+        resultado = self.logica.validar_crear_editar_ejercicio(41*"Z", "", "", 0)
+        self.assertEqual(resultado, "Error, el campo nombre supera los 40 caracteres")
+
     def test_validar_ejercicio_descripcion_vacio(self):
         resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "", "", 0)
         self.assertEqual(resultado, "Error, el campo descripcion esta vacio")
