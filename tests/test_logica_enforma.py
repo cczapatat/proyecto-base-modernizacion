@@ -75,3 +75,8 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def test_validar_ejercicio_nombre_duplicado(self):
         resultado = self.logica.validar_crear_editar_ejercicio("Salto Lazo", "Saltar 15 veces", "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
         self.assertEqual(resultado, "Error, el ejericio Salto Lazo ya existe")
+
+    def test_validar_ejercicio_exitoso(self):
+        resultado = self.logica.validar_crear_editar_ejercicio("Bupies", "Salto y Flexion",
+                                                               "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
+        self.assertEqual(resultado, "")
