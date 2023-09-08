@@ -13,3 +13,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def test_validar_ejercicio_nombre_vacio(self):
         resultado = self.logica.validar_crear_editar_ejercicio("", "", "", 0)
         self.assertEqual(resultado, "Error, el campo nombre esta vacio")
+
+    def test_validar_ejercicio_descripcion_vacio(self):
+        resultado = self.logica.validar_crear_editar_ejercicio("Juan", "", "", 0)
+        self.assertEqual(resultado, "Error, el campo descripcion esta vacio")
