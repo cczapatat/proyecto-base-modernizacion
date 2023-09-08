@@ -13,4 +13,7 @@ class LogicaEnForma(FachadaEnForma):
         if len(descripcion) == 0:
             return "Error, el campo descripcion esta vacio"
 
+        if len(enlace) == 0:
+            return "Error, el campo enlace esta vacio"
+
         return ""
