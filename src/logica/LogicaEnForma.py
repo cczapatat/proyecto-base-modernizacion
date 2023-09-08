@@ -23,4 +23,7 @@ class LogicaEnForma(FachadaEnForma):
         if not validators.url(enlace):
             return "Error, el campo enlace es incorrecto"
 
+        if "https://youtube.com/" not in enlace:
+            return "Error, el campo enlace no es de Youtube"
+
         return ""
