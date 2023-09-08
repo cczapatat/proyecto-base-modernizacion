@@ -11,6 +11,9 @@ class LogicaEnForma(FachadaEnForma):
         if len(nombre) == 0:
             return "Error, el campo nombre esta vacio"
 
+        if len(nombre) >40:
+            return "Error, el campo nombre supera los 40 caracteres"
+
         if len(descripcion) == 0:
             return "Error, el campo descripcion esta vacio"
 
