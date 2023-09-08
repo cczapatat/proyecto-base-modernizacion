@@ -80,3 +80,12 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         resultado = self.logica.validar_crear_editar_ejercicio("Bupies", "Salto y Flexion",
                                                                "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
         self.assertEqual(resultado, "")
+
+    def test_crear_ejercicio(self):
+        self.logica.crear_ejercicio("Burpies", "Salto y Flexion", "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
+
+        ejercicio =  self.session.query(Ejercicio).filter(Ejercicio.nombre == "Burpies").first()
+        self.assertEqual(ejercicio.nombre, "Burpies")
+        self.assertEqual(ejercicio.descripcion, "Salto y Flexion")
+        self.assertEqual(ejercicio.enlaceYoutube, "https://www.youtube.com/watch?v=bmNGEzHi4-s")
+        self.assertEqual(ejercicio.caloriasPorRepeticion, 10)
