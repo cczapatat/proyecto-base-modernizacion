@@ -1,5 +1,6 @@
 from src.logica.FachadaEnForma import FachadaEnForma
 
+import validators
 
 class LogicaEnForma(FachadaEnForma):
 
@@ -15,5 +16,11 @@ class LogicaEnForma(FachadaEnForma):
 
         if len(enlace) == 0:
             return "Error, el campo enlace esta vacio"
+
+        if len(enlace) == 0:
+            return "Error, el campo enlace esta vacio"
+
+        if not validators.url(enlace):
+            return "Error, el campo enlace es incorrecto"
 
         return ""
