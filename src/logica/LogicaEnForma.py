@@ -29,4 +29,7 @@ class LogicaEnForma(FachadaEnForma):
         if type(calorias) != int:
             return "Error, el campo calorias debe ser un número entero"
 
+        if calorias <= 0:
+            return "Error, el campo calorias debe ser mayor a cero"
+
         return ""
