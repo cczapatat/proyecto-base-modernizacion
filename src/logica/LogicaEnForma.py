@@ -17,6 +17,15 @@ class LogicaEnForma(FachadaEnForma):
     def __init__(self):
         ""
 
+    def mapper_none_to_empty(self, value):
+        temporal_value = value
+
+        if value is None:
+            temporal_value = ""
+
+        return temporal_value
+
+
     def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias):
         error = ""
         has_error = False
@@ -88,7 +97,11 @@ class LogicaEnForma(FachadaEnForma):
         personas = session.query(Persona).order_by(asc("nombre")).all()
         result = []
         for persona in personas:
-            result.append(persona.__dict__)
+            persona_dict = persona.__dict__
+            persona_dict["fecha_retiro"] = self.mapper_none_to_empty(persona_dict["fecha_retiro"])
+            persona_dict["razon_retiro"] = self.mapper_none_to_empty(persona_dict["razon_retiro"])
+
+            result.append(persona_dict)
 
         return result
 
