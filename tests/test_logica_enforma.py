@@ -81,6 +81,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
                 nombre=self.personas_data[i][0],
                 apellido=self.personas_data[i][1],
                 fecha_inicio=datetime.date.today().strftime("%Y-%m-%d"),
+                fecha_retiro="",
                 talla=self.personas_data[i][2],
                 peso=self.personas_data[i][3],
                 edad=self.personas_data[i][4],
