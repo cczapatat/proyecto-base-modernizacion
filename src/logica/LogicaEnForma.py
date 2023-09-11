@@ -138,6 +138,7 @@ class LogicaEnForma(FachadaEnForma):
     def validar_crear_editar_entrenamiento(self, persona, ejercicio, fecha, repeticiones, tiempo):
         error = ""
         has_error = False
+        str_to_date = datetime.datetime.now()
 
         if self.is_empty_dict(persona):
             has_error = True
@@ -153,8 +154,12 @@ class LogicaEnForma(FachadaEnForma):
 
         if not has_error:
             try:
-                datetime.datetime.strptime(fecha, '%Y-%m-%d')
+                str_to_date = datetime.datetime.strptime(fecha, '%Y-%m-%d')
             except ValueError:
+                has_error = True
                 error = "Error, la fecha no es valida. Debe tener formato YYYY-MM-DD"
+
+        if not has_error and str_to_date > datetime.datetime.now():
+            error = "Error, la fecha ingresada debe ser igual o menor al dia de hoy"
 
         return error
