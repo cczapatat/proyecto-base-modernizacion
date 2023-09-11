@@ -145,6 +145,7 @@ class LogicaEnForma(FachadaEnForma):
         error = ""
         has_error = False
         str_to_date = datetime.datetime.now()
+        repeticiones_to_int = 0
 
         if self.es_diccionario_vacio(persona):
             has_error = True
@@ -166,6 +167,13 @@ class LogicaEnForma(FachadaEnForma):
                 error = "Error, la fecha no es valida. Debe tener formato YYYY-MM-DD"
 
         if not has_error and (not self.fecha_menor_igual_dia_actual(str_to_date)):
+            has_error = True
             error = "Error, la fecha ingresada debe ser igual o menor al dia de hoy"
+
+        if not has_error:
+            try:
+                int(repeticiones)
+            except ValueError:
+                error = "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero"
 
         return error
