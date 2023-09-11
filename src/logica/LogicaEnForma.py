@@ -92,6 +92,11 @@ class LogicaEnForma(FachadaEnForma):
 
         return result
 
+    def dar_persona(self, id_persona):
+        personas = self.dar_personas()
+
+        return personas[id_persona]
+
     def dar_entrenamientos(self, id_persona):
         ejerciciosEntrenado = (session.query(EjercicioEntrenado, Ejercicio)
                                .join(Ejercicio, EjercicioEntrenado.ejercicio_id == Ejercicio.id)
