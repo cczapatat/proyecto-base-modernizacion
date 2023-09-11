@@ -276,3 +276,10 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "", "", "")
         self.assertEqual(resultado, "Error, el campo fecha esta vacio")
 
+    def test_validar_entrenamiento_fecha_formato_no_valido(self):
+        id_persona = 0
+        persona = self.session.query(Persona).filter(Persona.nombre == self.personas_data_sorted[id_persona][0]).first()
+        ejercicio = self.session.query(Ejercicio).first()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "fecha-erronea", "", "")
+        self.assertEqual(resultado, "Error, la fecha no es valida. Debe tener formato YYYY-MM-DD")

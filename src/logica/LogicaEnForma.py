@@ -144,6 +144,7 @@ class LogicaEnForma(FachadaEnForma):
             error = "Error, el diccionario persona esta vacio"
 
         if not has_error and len(ejercicio) == 0:
+            has_error = True
             error = "Error, el campo ejercicio esta vacio"
 
         if not has_error and len(fecha) == 0:
