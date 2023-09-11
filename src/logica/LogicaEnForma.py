@@ -132,3 +132,11 @@ class LogicaEnForma(FachadaEnForma):
             key=lambda entrenamiento: (entrenamiento["fechaDate"], entrenamiento["ejercicio"]),
             reverse=True,
         )
+
+    def validar_crear_editar_entrenamiento(self, persona, ejercicio, fecha, repeticiones, tiempo):
+        error = ""
+
+        if len(ejercicio) == 0:
+            error = "Error, el campo ejercicio esta vacio"
+
+        return error
