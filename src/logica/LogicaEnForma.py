@@ -135,8 +135,13 @@ class LogicaEnForma(FachadaEnForma):
 
     def validar_crear_editar_entrenamiento(self, persona, ejercicio, fecha, repeticiones, tiempo):
         error = ""
+        has_error = False
 
-        if len(ejercicio) == 0:
+        if not bool(persona):
+            has_error = True
+            error = "Error, el diccionario persona esta vacio"
+
+        if not has_error and len(ejercicio) == 0:
             error = "Error, el campo ejercicio esta vacio"
 
         return error
