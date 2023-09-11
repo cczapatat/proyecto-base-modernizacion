@@ -172,8 +172,12 @@ class LogicaEnForma(FachadaEnForma):
 
         if not has_error:
             try:
-                int(repeticiones)
+                repeticiones_to_int = int(repeticiones)
             except ValueError:
+                has_error = True
                 error = "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero"
+
+        if not has_error and repeticiones_to_int < 0:
+            error = "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero"
 
         return error
