@@ -146,4 +146,7 @@ class LogicaEnForma(FachadaEnForma):
         if not has_error and len(ejercicio) == 0:
             error = "Error, el campo ejercicio esta vacio"
 
+        if not has_error and len(fecha) == 0:
+            error = "Error, el campo fecha esta vacio"
+
         return error
