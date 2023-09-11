@@ -295,3 +295,10 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2026-09-09", "", "")
         self.assertEqual(resultado, "Error, la fecha ingresada debe ser igual o menor al dia de hoy")
+
+    def test_validar_entrenamiento_repeticiones_no_valido(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09", "", "")
+        self.assertEqual(resultado, "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero")
