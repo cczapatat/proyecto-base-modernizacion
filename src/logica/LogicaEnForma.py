@@ -98,9 +98,10 @@ class LogicaEnForma(FachadaEnForma):
         return personas[id_persona]
 
     def dar_entrenamientos(self, id_persona):
+        persona = self.dar_persona(id_persona)
         ejerciciosEntrenado = (session.query(EjercicioEntrenado, Ejercicio)
                                .join(Ejercicio, EjercicioEntrenado.ejercicio_id == Ejercicio.id)
-                               .filter(EjercicioEntrenado.persona_id == id_persona).all())
+                               .filter(EjercicioEntrenado.persona_id == persona["id"]).all())
         result = []
         for ejercicioEntrenado in ejerciciosEntrenado:
             result.append({

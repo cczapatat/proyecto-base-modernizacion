@@ -24,7 +24,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         self.session.commit()
 
-        self.persona_entrenando = self.session.query(Persona).order_by(asc("nombre")).first().__dict__
+        self.id_persona_entrenando = 0
 
         self.init_entrenamientos()
         self.session.commit()
@@ -95,6 +95,9 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def init_entrenamientos(self):
         self.entrenamientos_data = []
         ejercicios = self.session.query(Ejercicio).order_by(asc("nombre")).limit(10).all()
+        self.personaEntrenando = (self.session.query(Persona)
+                             .filter(Persona.nombre == self.personas_data_sorted[self.id_persona_entrenando][0])
+                             .first())
 
         for i in range(0, len(ejercicios)):
             value = i + 1
@@ -106,7 +109,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             fechaDate = datetime.datetime.strptime(fechaStr, "%Y-%m-%d")
 
             self.entrenamientos_data.append((
-                self.persona_entrenando["id"], # 0
+                self.personaEntrenando.id, # 0
                 ejercicios[i].id, # 1
                 ejercicios[i].nombre,
                 fechaStr, # 3
@@ -241,11 +244,11 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(len(ejerciciosEntrenados), 0)
 
     def test_listar_entrenamientos_de_una_persona(self):
-        ejerciciosEntrenados = self.logica.dar_entrenamientos(self.persona_entrenando["id"])
+        ejerciciosEntrenados = self.logica.dar_entrenamientos(self.id_persona_entrenando)
         self.assertEqual(len(ejerciciosEntrenados), len(self.entrenamientos_data))
 
     def test_listar_entrenamientos_de_una_persona_ordenados(self):
-        ejerciciosEntrenados = self.logica.dar_entrenamientos(self.persona_entrenando["id"])
+        ejerciciosEntrenados = self.logica.dar_entrenamientos(self.id_persona_entrenando)
         for ejercicioEntrenado, data_sorted in zip(ejerciciosEntrenados, self.entrenamientos_data_sorted):
             self.assertEqual(data_sorted[2], ejercicioEntrenado["ejercicio"])
             self.assertEqual(data_sorted[3], ejercicioEntrenado["fecha"])
