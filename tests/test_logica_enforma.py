@@ -264,14 +264,15 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(persona.nombre, result["nombre"])
         self.assertEqual(persona.apellido, result["apellido"])
 
-    def test_validad_entrenamiento_diccionario_persona_vacio(self):
+    def test_validar_entrenamiento_diccionario_persona_vacio(self):
         resultado = self.logica.validar_crear_editar_entrenamiento({}, "", "", "", "")
         self.assertEqual(resultado, "Error, el diccionario persona esta vacio")
 
-    def test_validar_entrenamiento_nombre_ejercicio_vacio(self):
+    def test_validar_entrenamiento_fecha_vacio(self):
         id_persona = 0
         persona = self.session.query(Persona).filter(Persona.nombre == self.personas_data_sorted[id_persona][0]).first()
+        ejercicio = self.session.query(Ejercicio).first()
 
-        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, "", "", "", "")
-        self.assertEqual(resultado, "Error, el campo ejercicio esta vacio")
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "", "", "")
+        self.assertEqual(resultado, "Error, el campo fecha esta vacio")
 
