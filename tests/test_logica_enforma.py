@@ -252,3 +252,10 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             self.assertEqual(data_sorted[5], ejercicioEntrenado["repeticiones"])
             self.assertEqual(data_sorted[6], ejercicioEntrenado["tiempo"])
         self.assertEqual(len(ejerciciosEntrenados), len(self.entrenamientos_data))
+
+    def test_dar_persona(self):
+        id_persona = 0
+        persona = self.session.query(Persona).filter(Persona.nombre == self.personas_data_sorted[id_persona][0]).first()
+        result = self.logica.dar_persona(id_persona)
+        self.assertEqual(persona.nombre, result["nombre"])
+        self.assertEqual(persona.apellido, result["apellido"])
