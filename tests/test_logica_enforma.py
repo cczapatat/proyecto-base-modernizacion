@@ -264,6 +264,10 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(persona.nombre, result["nombre"])
         self.assertEqual(persona.apellido, result["apellido"])
 
+    def test_validad_entrenamiento_diccionario_persona_vacio(self):
+        resultado = self.logica.validar_crear_editar_entrenamiento({}, "", "", "", "")
+        self.assertEqual(resultado, "Error, el diccionario persona esta vacio")
+
     def test_validar_entrenamiento_nombre_ejercicio_vacio(self):
         id_persona = 0
         persona = self.session.query(Persona).filter(Persona.nombre == self.personas_data_sorted[id_persona][0]).first()
