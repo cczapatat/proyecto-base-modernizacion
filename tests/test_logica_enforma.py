@@ -94,21 +94,39 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
     def init_entrenamientos(self):
         self.entrenamientos_data = []
-        ejercicios = self.session.query(Ejercicio).order_by(asc("nombre")).all()
+        ejercicios = self.session.query(Ejercicio).order_by(asc("nombre")).limit(10).all()
 
         for i in range(0, len(ejercicios)):
+            value = i + 1
+            if value < 10:
+                index = "0{}".format(value)
+            else:
+                index = value
+            fechaStr = "2023-0{}-{}".format(self.data_faker.random_int(1, 9), index)
+            fechaDate = datetime.datetime.strptime(fechaStr, "%Y-%m-%d")
+
             self.entrenamientos_data.append((
-                ejercicios[i].id,
-                self.data_faker.random_int(10, 1000),
-                "{}:{}:{}".format(self.data_faker.random_int(0, 2), self.data_faker.random_int(0, 59), self.data_faker.random_int(1, 59)),
+                self.persona_entrenando["id"], # 0
+                ejercicios[i].id, # 1
+                ejercicios[i].nombre,
+                fechaStr, # 3
+                fechaDate,
+                self.data_faker.random_int(10, 1000), # 5
+                "{}:{}:{}".format(self.data_faker.random_int(0, 2), self.data_faker.random_int(0, 59), self.data_faker.random_int(1, 59)), # 6
             ))
             self.session.add(EjercicioEntrenado(
-                persona_id=self.persona_entrenando["id"],
-                ejercicio_id=self.entrenamientos_data[i][0],
-                fecha=datetime.date.today().strftime("%Y-%m-%d"),
-                repeticiones=self.entrenamientos_data[i][1],
-                tiempo=self.entrenamientos_data[i][2],
+                persona_id=self.entrenamientos_data[i][0],
+                ejercicio_id=self.entrenamientos_data[i][1],
+                fecha=self.entrenamientos_data[i][3],
+                repeticiones=self.entrenamientos_data[i][5],
+                tiempo=self.entrenamientos_data[i][6],
             ))
+
+        self.entrenamientos_data_sorted = sorted(
+            self.entrenamientos_data,
+            key=lambda entrenamiento: (entrenamiento[3], entrenamiento[2]),
+            reverse=True,
+        )
 
     def tearDown(self):
         self.logica = None
@@ -224,4 +242,13 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
     def test_listar_entrenamientos_de_una_persona(self):
         ejerciciosEntrenados = self.logica.dar_entrenamientos(self.persona_entrenando["id"])
+        self.assertEqual(len(ejerciciosEntrenados), len(self.entrenamientos_data))
+
+    def test_listar_entrenamientos_de_una_persona_ordenados(self):
+        ejerciciosEntrenados = self.logica.dar_entrenamientos(self.persona_entrenando["id"])
+        for ejercicioEntrenado, data_sorted in zip(ejerciciosEntrenados, self.entrenamientos_data_sorted):
+            self.assertEqual(data_sorted[2], ejercicioEntrenado["ejercicio"])
+            self.assertEqual(data_sorted[3], ejercicioEntrenado["fecha"])
+            self.assertEqual(data_sorted[5], ejercicioEntrenado["repeticiones"])
+            self.assertEqual(data_sorted[6], ejercicioEntrenado["tiempo"])
         self.assertEqual(len(ejerciciosEntrenados), len(self.entrenamientos_data))
