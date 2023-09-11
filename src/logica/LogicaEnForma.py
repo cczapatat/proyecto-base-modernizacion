@@ -7,6 +7,7 @@ import validators
 
 from src.modelo.ejercicio import Ejercicio
 from src.modelo.persona import Persona
+from src.modelo.ejercicioEntrenado import EjercicioEntrenado
 
 
 class LogicaEnForma(FachadaEnForma):
@@ -88,3 +89,8 @@ class LogicaEnForma(FachadaEnForma):
             result.append(persona.__dict__)
 
         return result
+
+    def dar_entrenamientos(self, id_persona):
+        ejerciciosEntrenado = session.query(EjercicioEntrenado).filter(EjercicioEntrenado.persona_id == id_persona).all()
+
+        return ejerciciosEntrenado
