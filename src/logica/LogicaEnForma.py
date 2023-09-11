@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import asc
 
 from src.logica.FachadaEnForma import FachadaEnForma
@@ -7,6 +9,7 @@ import validators
 
 from src.modelo.ejercicio import Ejercicio
 from src.modelo.persona import Persona
+from src.modelo.ejercicioEntrenado import EjercicioEntrenado
 
 
 class LogicaEnForma(FachadaEnForma):
@@ -88,3 +91,25 @@ class LogicaEnForma(FachadaEnForma):
             result.append(persona.__dict__)
 
         return result
+
+    def dar_entrenamientos(self, id_persona):
+        ejerciciosEntrenado = (session.query(EjercicioEntrenado, Ejercicio)
+                               .join(Ejercicio, EjercicioEntrenado.ejercicio_id == Ejercicio.id)
+                               .filter(EjercicioEntrenado.persona_id == id_persona).all())
+        result = []
+        for ejercicioEntrenado in ejerciciosEntrenado:
+            result.append({
+                "id": ejercicioEntrenado[0].id,
+                "ejercicio_id": ejercicioEntrenado[0].ejercicio_id,
+                "ejercicio": ejercicioEntrenado[1].nombre,
+                "fecha": ejercicioEntrenado[0].fecha,
+                "fechaDate": datetime.datetime.strptime(ejercicioEntrenado[0].fecha, "%Y-%m-%d"),
+                "repeticiones": ejercicioEntrenado[0].repeticiones,
+                "tiempo": ejercicioEntrenado[0].tiempo,
+            })
+
+        return sorted(
+            result,
+            key=lambda entrenamiento: (entrenamiento["fechaDate"], entrenamiento["ejercicio"]),
+            reverse=True,
+        )

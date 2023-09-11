@@ -1,11 +1,13 @@
 import datetime
 import unittest
 from faker import Faker
+from sqlalchemy import asc
 
 from src.logica.LogicaEnForma import LogicaEnForma
 from src.modelo.declarative_base import Session, Base, engine
 from src.modelo.ejercicio import Ejercicio
 from src.modelo.persona import Persona
+from src.modelo.ejercicioEntrenado import EjercicioEntrenado
 
 class LogicaEnFormaTestCase(unittest.TestCase):
 
@@ -20,6 +22,11 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.init_ejercicios()
         self.init_personas()
 
+        self.session.commit()
+
+        self.persona_entrenando = self.session.query(Persona).order_by(asc("nombre")).first().__dict__
+
+        self.init_entrenamientos()
         self.session.commit()
 
     def init_ejercicios(self):
@@ -85,6 +92,42 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         self.personas_data_sorted = sorted(self.personas_data, key=lambda persona: persona[0])
 
+    def init_entrenamientos(self):
+        self.entrenamientos_data = []
+        ejercicios = self.session.query(Ejercicio).order_by(asc("nombre")).limit(10).all()
+
+        for i in range(0, len(ejercicios)):
+            value = i + 1
+            if value < 10:
+                index = "0{}".format(value)
+            else:
+                index = value
+            fechaStr = "2023-0{}-{}".format(self.data_faker.random_int(1, 9), index)
+            fechaDate = datetime.datetime.strptime(fechaStr, "%Y-%m-%d")
+
+            self.entrenamientos_data.append((
+                self.persona_entrenando["id"], # 0
+                ejercicios[i].id, # 1
+                ejercicios[i].nombre,
+                fechaStr, # 3
+                fechaDate,
+                self.data_faker.random_int(10, 1000), # 5
+                "{}:{}:{}".format(self.data_faker.random_int(0, 2), self.data_faker.random_int(0, 59), self.data_faker.random_int(1, 59)), # 6
+            ))
+            self.session.add(EjercicioEntrenado(
+                persona_id=self.entrenamientos_data[i][0],
+                ejercicio_id=self.entrenamientos_data[i][1],
+                fecha=self.entrenamientos_data[i][3],
+                repeticiones=self.entrenamientos_data[i][5],
+                tiempo=self.entrenamientos_data[i][6],
+            ))
+
+        self.entrenamientos_data_sorted = sorted(
+            self.entrenamientos_data,
+            key=lambda entrenamiento: (entrenamiento[3], entrenamiento[2]),
+            reverse=True,
+        )
+
     def tearDown(self):
         self.logica = None
 
@@ -99,6 +142,11 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         for persona in personas:
             self.session.delete(persona)
+
+        ejerciciosEntrenados = self.session.query(EjercicioEntrenado).all()
+
+        for ejercicioEntrenado in ejerciciosEntrenados:
+            self.session.delete(ejercicioEntrenado)
 
         self.session.commit()
         self.session.close()
@@ -187,3 +235,20 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             self.assertEqual(data_sorted[7], persona["pecho"])
             self.assertEqual(data_sorted[8], persona["cintura"])
         self.assertEqual(len(personas), 5)
+
+    def test_lista_entrenamientos_de_una_persona_incorrect(self):
+        ejerciciosEntrenados = self.logica.dar_entrenamientos(-1)
+        self.assertEqual(len(ejerciciosEntrenados), 0)
+
+    def test_listar_entrenamientos_de_una_persona(self):
+        ejerciciosEntrenados = self.logica.dar_entrenamientos(self.persona_entrenando["id"])
+        self.assertEqual(len(ejerciciosEntrenados), len(self.entrenamientos_data))
+
+    def test_listar_entrenamientos_de_una_persona_ordenados(self):
+        ejerciciosEntrenados = self.logica.dar_entrenamientos(self.persona_entrenando["id"])
+        for ejercicioEntrenado, data_sorted in zip(ejerciciosEntrenados, self.entrenamientos_data_sorted):
+            self.assertEqual(data_sorted[2], ejercicioEntrenado["ejercicio"])
+            self.assertEqual(data_sorted[3], ejercicioEntrenado["fecha"])
+            self.assertEqual(data_sorted[5], ejercicioEntrenado["repeticiones"])
+            self.assertEqual(data_sorted[6], ejercicioEntrenado["tiempo"])
+        self.assertEqual(len(ejerciciosEntrenados), len(self.entrenamientos_data))
