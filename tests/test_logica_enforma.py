@@ -283,3 +283,11 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "fecha-erronea", "", "")
         self.assertEqual(resultado, "Error, la fecha no es valida. Debe tener formato YYYY-MM-DD")
+
+    def test_validar_entrenamiento_fecha_no_valida(self):
+        id_persona = 0
+        persona = self.session.query(Persona).filter(Persona.nombre == self.personas_data_sorted[id_persona][0]).first()
+        ejercicio = self.session.query(Ejercicio).first()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2026-09-09", "", "")
+        self.assertEqual(resultado, "Error, la fecha ingresada debe ser igual o menor al dia de hoy")
