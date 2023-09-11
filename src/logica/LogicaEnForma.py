@@ -25,6 +25,8 @@ class LogicaEnForma(FachadaEnForma):
 
         return temporal_value
 
+    def is_empty_dict(self, dict):
+        return bool(dict) is False
 
     def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias):
         error = ""
@@ -137,7 +139,7 @@ class LogicaEnForma(FachadaEnForma):
         error = ""
         has_error = False
 
-        if not bool(persona):
+        if self.is_empty_dict(persona):
             has_error = True
             error = "Error, el diccionario persona esta vacio"
 
