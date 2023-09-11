@@ -148,6 +148,13 @@ class LogicaEnForma(FachadaEnForma):
             error = "Error, el campo ejercicio esta vacio"
 
         if not has_error and len(fecha) == 0:
+            has_error = True
             error = "Error, el campo fecha esta vacio"
+
+        if not has_error:
+            try:
+                datetime.datetime.strptime(fecha, '%Y-%m-%d')
+            except ValueError:
+                error = "Error, la fecha no es valida. Debe tener formato YYYY-MM-DD"
 
         return error
