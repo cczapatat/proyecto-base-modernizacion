@@ -25,8 +25,14 @@ class LogicaEnForma(FachadaEnForma):
 
         return temporal_value
 
-    def is_empty_dict(self, dict):
+    def es_diccionario_vacio(self, dict):
         return bool(dict) is False
+
+    def obtener_fecha_de_string(self, str_fecha):
+        return datetime.datetime.strptime(str_fecha, '%Y-%m-%d')
+
+    def fecha_menor_igual_dia_actual(self, fecha):
+        return fecha <= datetime.datetime.now()
 
     def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias):
         error = ""
@@ -140,7 +146,7 @@ class LogicaEnForma(FachadaEnForma):
         has_error = False
         str_to_date = datetime.datetime.now()
 
-        if self.is_empty_dict(persona):
+        if self.es_diccionario_vacio(persona):
             has_error = True
             error = "Error, el diccionario persona esta vacio"
 
@@ -154,12 +160,12 @@ class LogicaEnForma(FachadaEnForma):
 
         if not has_error:
             try:
-                str_to_date = datetime.datetime.strptime(fecha, '%Y-%m-%d')
+                str_to_date = self.obtener_fecha_de_string(fecha)
             except ValueError:
                 has_error = True
                 error = "Error, la fecha no es valida. Debe tener formato YYYY-MM-DD"
 
-        if not has_error and str_to_date > datetime.datetime.now():
+        if not has_error and (not self.fecha_menor_igual_dia_actual(str_to_date)):
             error = "Error, la fecha ingresada debe ser igual o menor al dia de hoy"
 
         return error
