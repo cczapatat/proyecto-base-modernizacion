@@ -444,3 +444,19 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(reporte["persona"]["nombre"], persona.nombre)
         self.assertEqual(reporte["persona"]["talla"], persona.talla)
         self.assertEqual(reporte["persona"]["peso"], persona.peso)
+
+    def test_generar_reporte_imc_obesidad_persona_sin_entrenamientos(self):
+        nuevo_registro = self.agregar_persona("bien", 1.7, 100)
+        persona = nuevo_registro["persona"]
+        imc = persona.peso / (pow(persona.talla, 2))
+        id_persona = nuevo_registro["id_persona"]
+
+        reporte = self.logica.dar_reporte(id_persona)
+        self.assertEqual(len(reporte["estadisticas"]["entrenamientos"]), 0)
+        self.assertEqual(reporte["estadisticas"]["total_repeticiones"], 0)
+        self.assertEqual(reporte["estadisticas"]["total_calorias"], 0)
+        self.assertEqual(reporte["estadisticas"]["imc"], imc)
+        self.assertEqual(reporte["estadisticas"]["clasificacion"], "Obesidad")
+        self.assertEqual(reporte["persona"]["nombre"], persona.nombre)
+        self.assertEqual(reporte["persona"]["talla"], persona.talla)
+        self.assertEqual(reporte["persona"]["peso"], persona.peso)
