@@ -356,6 +356,8 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def test_generar_report_persona_sin_entrenamientos(self):
         reporte = self.logica.dar_reporte(self.id_persona_entrenando)
         self.assertEqual(len(reporte["estadisticas"]["entrenamientos"]), 0)
+        self.assertEqual(reporte["estadisticas"]["total_repeticiones"], 0)
+        self.assertEqual(reporte["estadisticas"]["total_calorias"], 0)
         self.assertEqual(reporte["persona"]["nombre"], self.personas_data_sorted[self.id_persona_entrenando][0])
         self.assertEqual(reporte["persona"]["talla"], self.personas_data_sorted[self.id_persona_entrenando][2])
         self.assertEqual(reporte["persona"]["peso"], self.personas_data_sorted[self.id_persona_entrenando][3])
