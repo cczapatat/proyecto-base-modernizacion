@@ -316,3 +316,11 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09", "10", "")
         self.assertEqual(resultado, "Error, el tiempo esta vacio")
+
+    def test_validar_entrenamiento_tiempo_formato_no_valido(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09",
+                                                                   "10", "tiempo_mal_formateado")
+        self.assertEqual(resultado, "Error, el tiempo no es valida. Debe tener formato hh:mm:ss")
