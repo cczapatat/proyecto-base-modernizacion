@@ -212,6 +212,8 @@ class LogicaEnForma(FachadaEnForma):
         return {
             "persona": persona,
             "estadisticas": {
+                "total_repeticiones": 0,
+                "total_calorias": 0,
                 "entrenamientos": []
             }
         }
