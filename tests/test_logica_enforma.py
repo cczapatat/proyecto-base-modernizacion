@@ -1,9 +1,9 @@
 import datetime
 import unittest
 from faker import Faker
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, func
 
-from src.logica.LogicaEnForma import LogicaEnForma
+from src.logica.LogicaEnForma import LogicaEnForma, ClasificacionIMC
 from src.modelo.declarative_base import Session, Base, engine
 from src.modelo.ejercicio import Ejercicio
 from src.modelo.persona import Persona
@@ -167,10 +167,53 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             reverse=True,
         )
 
+    def crear_entrenamientos(self, id_persona):
+        ejercicios = self.session.query(Ejercicio).order_by(asc("nombre")).limit(10).all()
+        entrenados = []
+
+        total_calorias = 0
+        total_repeticiones = 0
+
+        for i in range(0, len(ejercicios)):
+            entrenado = EjercicioEntrenado(
+                persona_id=id_persona,
+                ejercicio_id=ejercicios[i].id,
+                fecha=self.data_faker.random_choices(elements=('2023-09-10', '2023-09-11', '2023-09-12'), length=1)[0],
+                repeticiones=self.data_faker.random_int(10, 300),
+                tiempo="00:10:00",
+            )
+            entrenados.append(entrenado)
+            self.session.add(entrenado)
+            self.session.commit()
+
+        historial = (self.session.query(
+                        EjercicioEntrenado,
+                        func.sum(EjercicioEntrenado.repeticiones),
+                        func.sum(EjercicioEntrenado.repeticiones * Ejercicio.calorias),
+                    )
+                     .join(Ejercicio, EjercicioEntrenado.ejercicio_id == Ejercicio.id)
+                     .filter(EjercicioEntrenado.persona_id == id_persona)
+                     .group_by("fecha").order_by(desc("fecha")).all())
+
+        for item in historial:
+            total_repeticiones += item[1]
+            total_calorias += item[2]
+
+        return {
+            "historial": historial,
+            "total_calorias": total_calorias,
+            "total_repeticiones": total_repeticiones,
+        }
+
     def tearDown(self):
         self.logica = None
 
         self.session = Session()
+
+        ejerciciosEntrenados = self.session.query(EjercicioEntrenado).all()
+
+        for ejercicioEntrenado in ejerciciosEntrenados:
+            self.session.delete(ejercicioEntrenado)
 
         ejercicios = self.session.query(Ejercicio).all()
 
@@ -181,11 +224,6 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         for persona in personas:
             self.session.delete(persona)
-
-        ejerciciosEntrenados = self.session.query(EjercicioEntrenado).all()
-
-        for ejercicioEntrenado in ejerciciosEntrenados:
-            self.session.delete(ejercicioEntrenado)
 
         self.session.commit()
         self.session.close()
@@ -389,13 +427,14 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(entrenamiento["tiempo"], "00:10:00")
 
     def test_generar_report_persona_sin_entrenamientos(self):
-        reporte = self.logica.dar_reporte(self.id_persona_entrenando)
+        index = len(self.personas_data_sorted)-1
+        reporte = self.logica.dar_reporte(index)
         self.assertEqual(len(reporte["estadisticas"]["entrenamientos"]), 0)
         self.assertEqual(reporte["estadisticas"]["total_repeticiones"], 0)
         self.assertEqual(reporte["estadisticas"]["total_calorias"], 0)
-        self.assertEqual(reporte["persona"]["nombre"], self.personas_data_sorted[self.id_persona_entrenando][0])
-        self.assertEqual(reporte["persona"]["talla"], self.personas_data_sorted[self.id_persona_entrenando][2])
-        self.assertEqual(reporte["persona"]["peso"], self.personas_data_sorted[self.id_persona_entrenando][3])
+        self.assertEqual(reporte["persona"]["nombre"], self.personas_data_sorted[index][0])
+        self.assertEqual(reporte["persona"]["talla"], self.personas_data_sorted[index][2])
+        self.assertEqual(reporte["persona"]["peso"], self.personas_data_sorted[index][3])
 
     def test_generar_reporte_imc_bajo_peso_persona_sin_entrenamientos(self):
         nuevo_registro = self.agregar_persona("flaco", 1.8, 55)
@@ -408,7 +447,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(reporte["estadisticas"]["total_repeticiones"], 0)
         self.assertEqual(reporte["estadisticas"]["total_calorias"], 0)
         self.assertEqual(reporte["estadisticas"]["imc"], imc)
-        self.assertEqual(reporte["estadisticas"]["clasificacion"], "Bajo peso")
+        self.assertEqual(reporte["estadisticas"]["clasificacion"], ClasificacionIMC.BAJO_PESO.value)
         self.assertEqual(reporte["persona"]["nombre"], persona.nombre)
         self.assertEqual(reporte["persona"]["talla"], persona.talla)
         self.assertEqual(reporte["persona"]["peso"], persona.peso)
@@ -424,13 +463,13 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(reporte["estadisticas"]["total_repeticiones"], 0)
         self.assertEqual(reporte["estadisticas"]["total_calorias"], 0)
         self.assertEqual(reporte["estadisticas"]["imc"], imc)
-        self.assertEqual(reporte["estadisticas"]["clasificacion"], "Peso saludable")
+        self.assertEqual(reporte["estadisticas"]["clasificacion"], ClasificacionIMC.PESO_SALUDABLE.value)
         self.assertEqual(reporte["persona"]["nombre"], persona.nombre)
         self.assertEqual(reporte["persona"]["talla"], persona.talla)
         self.assertEqual(reporte["persona"]["peso"], persona.peso)
 
     def test_generar_reporte_imc__persona_sin_entrenamientos(self):
-        nuevo_registro = self.agregar_persona("bien", 1.7, 75)
+        nuevo_registro = self.agregar_persona("mal", 1.7, 75)
         persona = nuevo_registro["persona"]
         imc = persona.peso / (pow(persona.talla, 2))
         id_persona = nuevo_registro["id_persona"]
@@ -440,13 +479,13 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(reporte["estadisticas"]["total_repeticiones"], 0)
         self.assertEqual(reporte["estadisticas"]["total_calorias"], 0)
         self.assertEqual(reporte["estadisticas"]["imc"], imc)
-        self.assertEqual(reporte["estadisticas"]["clasificacion"], "Sobrepeso")
+        self.assertEqual(reporte["estadisticas"]["clasificacion"], ClasificacionIMC.SOBREPESO.value)
         self.assertEqual(reporte["persona"]["nombre"], persona.nombre)
         self.assertEqual(reporte["persona"]["talla"], persona.talla)
         self.assertEqual(reporte["persona"]["peso"], persona.peso)
 
     def test_generar_reporte_imc_obesidad_persona_sin_entrenamientos(self):
-        nuevo_registro = self.agregar_persona("bien", 1.7, 100)
+        nuevo_registro = self.agregar_persona("hiper_mal", 1.7, 100)
         persona = nuevo_registro["persona"]
         imc = persona.peso / (pow(persona.talla, 2))
         id_persona = nuevo_registro["id_persona"]
@@ -456,7 +495,33 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(reporte["estadisticas"]["total_repeticiones"], 0)
         self.assertEqual(reporte["estadisticas"]["total_calorias"], 0)
         self.assertEqual(reporte["estadisticas"]["imc"], imc)
-        self.assertEqual(reporte["estadisticas"]["clasificacion"], "Obesidad")
+        self.assertEqual(reporte["estadisticas"]["clasificacion"], ClasificacionIMC.OBESIDAD.value)
+        self.assertEqual(reporte["persona"]["nombre"], persona.nombre)
+        self.assertEqual(reporte["persona"]["talla"], persona.talla)
+        self.assertEqual(reporte["persona"]["peso"], persona.peso)
+
+    def test_generar_reporte_persona_con_entrenamientos(self):
+        nuevo_registro = self.agregar_persona("pepito", 1.7, 70)
+        persona = nuevo_registro["persona"]
+        imc = persona.peso / (pow(persona.talla, 2))
+        id_persona = nuevo_registro["id_persona"]
+
+        rutina = self.crear_entrenamientos(persona.id)
+        historial = rutina["historial"]
+        total_calorias = rutina["total_calorias"]
+        total_repeticiones = rutina["total_repeticiones"]
+
+        reporte = self.logica.dar_reporte(id_persona)
+        self.assertEqual(len(reporte["estadisticas"]["entrenamientos"]), len(historial))
+        for i in range(0, len(historial)):
+            self.assertEqual(reporte["estadisticas"]["entrenamientos"][i]["fecha"], historial[i][0].fecha)
+            self.assertEqual(reporte["estadisticas"]["entrenamientos"][i]["repeticiones"], historial[i][1])
+            self.assertEqual(reporte["estadisticas"]["entrenamientos"][i]["calorias"], historial[i][2])
+
+        self.assertEqual(reporte["estadisticas"]["total_repeticiones"], total_repeticiones)
+        self.assertEqual(reporte["estadisticas"]["total_calorias"], total_calorias)
+        self.assertEqual(reporte["estadisticas"]["imc"], imc)
+        self.assertEqual(reporte["estadisticas"]["clasificacion"], ClasificacionIMC.PESO_SALUDABLE.value)
         self.assertEqual(reporte["persona"]["nombre"], persona.nombre)
         self.assertEqual(reporte["persona"]["talla"], persona.talla)
         self.assertEqual(reporte["persona"]["peso"], persona.peso)
