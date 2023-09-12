@@ -6,6 +6,7 @@ from src.logica.FachadaEnForma import FachadaEnForma
 from src.modelo.declarative_base import session
 
 import validators
+import re
 
 from src.modelo.ejercicio import Ejercicio
 from src.modelo.persona import Persona
@@ -28,8 +29,8 @@ class LogicaEnForma(FachadaEnForma):
     def es_diccionario_vacio(self, dict):
         return bool(dict) is False
 
-    def obtener_fecha_de_string(self, str_fecha):
-        return datetime.datetime.strptime(str_fecha, '%Y-%m-%d')
+    def obtener_fecha_de_string(self, str_fecha, formato):
+        return datetime.datetime.strptime(str_fecha, formato)
 
     def fecha_menor_igual_dia_actual(self, fecha):
         return fecha <= datetime.datetime.now()
@@ -161,7 +162,8 @@ class LogicaEnForma(FachadaEnForma):
 
         if not has_error:
             try:
-                str_to_date = self.obtener_fecha_de_string(fecha)
+                formato_dia = '%Y-%m-%d'
+                str_to_date = self.obtener_fecha_de_string(fecha, formato_dia)
             except ValueError:
                 has_error = True
                 error = "Error, la fecha no es valida. Debe tener formato YYYY-MM-DD"
