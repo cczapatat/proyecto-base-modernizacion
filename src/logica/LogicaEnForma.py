@@ -205,3 +205,13 @@ class LogicaEnForma(FachadaEnForma):
         session.commit()
 
         return True
+
+    def dar_reporte(self, id_persona):
+        persona = self.dar_persona(id_persona)
+
+        return {
+            "persona": persona,
+            "estadisticas": {
+                "entrenamientos": []
+            }
+        }
