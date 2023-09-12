@@ -69,8 +69,8 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             self.personas_data.append((
                 self.data_faker.unique.first_name(),
                 self.data_faker.unique.last_name(),
-                self.data_faker.random_int(10, 1000),
-                self.data_faker.random_int(10, 1000),
+                self.data_faker.random_int(1, 2),
+                self.data_faker.random_int(70, 100),
                 self.data_faker.random_int(10, 100),
                 self.data_faker.random_int(10, 1000),
                 self.data_faker.random_int(10, 1000),
@@ -92,6 +92,20 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             ))
 
         self.personas_data_sorted = sorted(self.personas_data, key=lambda persona: persona[0])
+
+    def agregar_persona(self, persona):
+        self.personas_data_sorted.append((
+            persona.nombre,
+            persona.apellido,
+            persona.talla,
+            persona.peso,
+            persona.edad,
+            persona.brazo,
+            persona.pierna,
+            persona.pecho,
+            persona.cintura,
+        ))
+        self.personas_data_sorted = sorted(self.personas_data_sorted, key=lambda persona: persona[0])
 
     def init_entrenamientos(self):
         self.entrenamientos_data = []
@@ -361,3 +375,35 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(reporte["persona"]["nombre"], self.personas_data_sorted[self.id_persona_entrenando][0])
         self.assertEqual(reporte["persona"]["talla"], self.personas_data_sorted[self.id_persona_entrenando][2])
         self.assertEqual(reporte["persona"]["peso"], self.personas_data_sorted[self.id_persona_entrenando][3])
+
+    def test_generar_reporte_imc_bajo_peso_persona_sin_entrenamientos(self):
+        persona = Persona(
+            nombre="Flaco",
+            apellido="N/A",
+            fecha_inicio=datetime.date.today().strftime("%Y-%m-%d"),
+            talla=1.8,
+            peso=55,
+            edad=self.data_faker.random_int(10, 100),
+            brazo=self.data_faker.random_int(10, 100),
+            pierna=self.data_faker.random_int(10, 100),
+            pecho=self.data_faker.random_int(10, 100),
+            cintura=self.data_faker.random_int(10, 100),
+        )
+        self.session.add(persona)
+        self.session.commit()
+
+        imc = persona.peso/(persona.talla*persona.talla)
+        self.agregar_persona(persona)
+        id_persona = self.personas_data_sorted.index(
+            next(filter(lambda item: item[0] == persona.nombre, self.personas_data_sorted))
+        )
+
+        reporte = self.logica.dar_reporte(id_persona)
+        self.assertEqual(len(reporte["estadisticas"]["entrenamientos"]), 0)
+        self.assertEqual(reporte["estadisticas"]["total_repeticiones"], 0)
+        self.assertEqual(reporte["estadisticas"]["total_calorias"], 0)
+        self.assertEqual(reporte["estadisticas"]["imc"], imc)
+        self.assertEqual(reporte["estadisticas"]["clasificacion"], "Bajo peso")
+        self.assertEqual(reporte["persona"]["nombre"], persona.nombre)
+        self.assertEqual(reporte["persona"]["talla"], persona.talla)
+        self.assertEqual(reporte["persona"]["peso"], persona.peso)
