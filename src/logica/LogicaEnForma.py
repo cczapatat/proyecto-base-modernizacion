@@ -213,6 +213,8 @@ class LogicaEnForma(FachadaEnForma):
 
         if imc < 18.5:
             clasificacion = "Bajo peso"
+        elif 18.5 <= imc <= 24.9:
+            clasificacion = "Peso saludable"
 
         return {
             "persona": persona,
