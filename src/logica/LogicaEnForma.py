@@ -1,7 +1,7 @@
 import datetime
 import enum
 
-from sqlalchemy import asc
+from sqlalchemy import asc, func, desc
 
 from src.logica.FachadaEnForma import FachadaEnForma
 from src.modelo.declarative_base import session
@@ -228,17 +228,40 @@ class LogicaEnForma(FachadaEnForma):
         return True
 
     def dar_reporte(self, id_persona):
+        entrenamientos_data = []
         persona = self.dar_persona(id_persona)
+        total_repeticiones = 0
+        total_calorias = 0
+
+        historial = (session.query(
+            EjercicioEntrenado,
+            func.sum(EjercicioEntrenado.repeticiones),
+            func.sum(EjercicioEntrenado.repeticiones * Ejercicio.calorias),
+        )
+                     .join(Ejercicio, EjercicioEntrenado.ejercicio_id == Ejercicio.id)
+                     .filter(EjercicioEntrenado.persona_id == persona["id"])
+                     .group_by("fecha").order_by(desc("fecha")).all())
+
+        for item in historial:
+            entrenamientos_data.append({
+                "fecha": item[0].fecha,
+                "repeticiones": item[1],
+                "calorias": item[2],
+            })
+
+            total_repeticiones += item[1]
+            total_calorias += item[2]
+
         imc = self.calcular_imc(persona["peso"], persona["talla"])
         clasificacion = self.calcular_clasificacion_imc(imc)
 
         return {
             "persona": persona,
             "estadisticas": {
-                "total_repeticiones": 0,
-                "total_calorias": 0,
+                "total_repeticiones": total_repeticiones,
+                "total_calorias": total_calorias,
                 "imc": imc,
                 "clasificacion": clasificacion,
-                "entrenamientos": []
+                "entrenamientos": entrenamientos_data
             }
         }
