@@ -94,6 +94,10 @@ class LogicaEnForma(FachadaEnForma):
 
         return True
 
+    def dar_ejercici_por_nombre (self, nombre_ejercicio):
+        return session.query(Ejercicio).filter(Ejercicio.nombre == nombre_ejercicio).first()
+
+
     def dar_ejercicios(self):
         ejercicios = session.query(Ejercicio).order_by(asc("nombre")).all()
         result = []
@@ -191,3 +195,13 @@ class LogicaEnForma(FachadaEnForma):
             error = "Error, el tiempo no es valida. Debe tener formato hh:mm:ss"
 
         return error
+
+    def crear_entrenamiento(self, persona, ejercicio, fecha, repeticiones, tiempo):
+        objeto_ejercicio = self.dar_ejercici_por_nombre(ejercicio)
+
+        entrenamiento = EjercicioEntrenado(persona_id=persona["id"], ejercicio_id=objeto_ejercicio.id, fecha=fecha,
+                              repeticiones=repeticiones, tiempo=tiempo)
+        session.add(entrenamiento)
+        session.commit()
+
+        return True
