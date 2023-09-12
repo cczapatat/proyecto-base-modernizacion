@@ -93,7 +93,22 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         self.personas_data_sorted = sorted(self.personas_data, key=lambda persona: persona[0])
 
-    def agregar_persona(self, persona):
+    def agregar_persona(self, nombre, talla, peso):
+        persona = Persona(
+            nombre=nombre,
+            apellido="N/A",
+            fecha_inicio=datetime.date.today().strftime("%Y-%m-%d"),
+            talla=talla,
+            peso=peso,
+            edad=self.data_faker.random_int(10, 100),
+            brazo=self.data_faker.random_int(10, 100),
+            pierna=self.data_faker.random_int(10, 100),
+            pecho=self.data_faker.random_int(10, 100),
+            cintura=self.data_faker.random_int(10, 100),
+        )
+        self.session.add(persona)
+        self.session.commit()
+
         self.personas_data_sorted.append((
             persona.nombre,
             persona.apellido,
@@ -106,6 +121,12 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             persona.cintura,
         ))
         self.personas_data_sorted = sorted(self.personas_data_sorted, key=lambda persona: persona[0])
+
+        id_persona = self.personas_data_sorted.index(
+            next(filter(lambda item: item[0] == persona.nombre, self.personas_data_sorted))
+        )
+
+        return { "persona": persona, "id_persona": id_persona }
 
     def init_entrenamientos(self):
         self.entrenamientos_data = []
@@ -377,26 +398,10 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(reporte["persona"]["peso"], self.personas_data_sorted[self.id_persona_entrenando][3])
 
     def test_generar_reporte_imc_bajo_peso_persona_sin_entrenamientos(self):
-        persona = Persona(
-            nombre="Flaco",
-            apellido="N/A",
-            fecha_inicio=datetime.date.today().strftime("%Y-%m-%d"),
-            talla=1.8,
-            peso=55,
-            edad=self.data_faker.random_int(10, 100),
-            brazo=self.data_faker.random_int(10, 100),
-            pierna=self.data_faker.random_int(10, 100),
-            pecho=self.data_faker.random_int(10, 100),
-            cintura=self.data_faker.random_int(10, 100),
-        )
-        self.session.add(persona)
-        self.session.commit()
-
-        imc = persona.peso/(persona.talla*persona.talla)
-        self.agregar_persona(persona)
-        id_persona = self.personas_data_sorted.index(
-            next(filter(lambda item: item[0] == persona.nombre, self.personas_data_sorted))
-        )
+        nuevo_registro = self.agregar_persona("flaco", 1.8, 55)
+        persona = nuevo_registro["persona"]
+        imc = persona.peso / (pow(persona.talla, 2))
+        id_persona = nuevo_registro["id_persona"]
 
         reporte = self.logica.dar_reporte(id_persona)
         self.assertEqual(len(reporte["estadisticas"]["entrenamientos"]), 0)
@@ -404,6 +409,22 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(reporte["estadisticas"]["total_calorias"], 0)
         self.assertEqual(reporte["estadisticas"]["imc"], imc)
         self.assertEqual(reporte["estadisticas"]["clasificacion"], "Bajo peso")
+        self.assertEqual(reporte["persona"]["nombre"], persona.nombre)
+        self.assertEqual(reporte["persona"]["talla"], persona.talla)
+        self.assertEqual(reporte["persona"]["peso"], persona.peso)
+
+    def test_generar_reporte_imc_peso_saludable_persona_sin_entrenamientos(self):
+        nuevo_registro = self.agregar_persona("bien", 1.8, 70)
+        persona = nuevo_registro["persona"]
+        imc = persona.peso / (pow(persona.talla, 2))
+        id_persona = nuevo_registro["id_persona"]
+
+        reporte = self.logica.dar_reporte(id_persona)
+        self.assertEqual(len(reporte["estadisticas"]["entrenamientos"]), 0)
+        self.assertEqual(reporte["estadisticas"]["total_repeticiones"], 0)
+        self.assertEqual(reporte["estadisticas"]["total_calorias"], 0)
+        self.assertEqual(reporte["estadisticas"]["imc"], imc)
+        self.assertEqual(reporte["estadisticas"]["clasificacion"], "Peso saludable")
         self.assertEqual(reporte["persona"]["nombre"], persona.nombre)
         self.assertEqual(reporte["persona"]["talla"], persona.talla)
         self.assertEqual(reporte["persona"]["peso"], persona.peso)
