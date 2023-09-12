@@ -1,4 +1,5 @@
 import datetime
+import enum
 
 from sqlalchemy import asc
 
@@ -12,6 +13,11 @@ from src.modelo.ejercicio import Ejercicio
 from src.modelo.persona import Persona
 from src.modelo.ejercicioEntrenado import EjercicioEntrenado
 
+class ClasificacionIMC(enum.Enum):
+    BAJO_PESO = "Bajo peso"
+    PESO_SALUDABLE = "Peso saludable"
+    SOBREPESO = "Sobrepeso"
+    OBESIDAD = "Obesidad"
 
 class LogicaEnForma(FachadaEnForma):
 
@@ -34,6 +40,21 @@ class LogicaEnForma(FachadaEnForma):
 
     def fecha_menor_igual_dia_actual(self, fecha):
         return fecha <= datetime.datetime.now()
+
+    def calcular_imc(self, peso, talla):
+        return peso / pow(talla, 2)
+
+    def calcular_clasificacion_imc(self, imc):
+        if imc < 18.5:
+            clasificacion = ClasificacionIMC.BAJO_PESO.value
+        elif 18.5 <= imc <= 24.9:
+            clasificacion = ClasificacionIMC.PESO_SALUDABLE.value
+        elif 25 <= imc <= 29.9:
+            clasificacion = ClasificacionIMC.SOBREPESO.value
+        else:
+            clasificacion = ClasificacionIMC.OBESIDAD.value
+
+        return clasificacion
 
     def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias):
         error = ""
@@ -208,16 +229,8 @@ class LogicaEnForma(FachadaEnForma):
 
     def dar_reporte(self, id_persona):
         persona = self.dar_persona(id_persona)
-        imc = persona["peso"] / pow(persona["talla"], 2)
-
-        if imc < 18.5:
-            clasificacion = "Bajo peso"
-        elif 18.5 <= imc <= 24.9:
-            clasificacion = "Peso saludable"
-        elif 25 <= imc <= 29.9:
-            clasificacion = "Sobrepeso"
-        else:
-            clasificacion = "Obesidad"
+        imc = self.calcular_imc(persona["peso"], persona["talla"])
+        clasificacion = self.calcular_clasificacion_imc(imc)
 
         return {
             "persona": persona,
