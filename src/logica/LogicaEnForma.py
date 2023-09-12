@@ -208,12 +208,19 @@ class LogicaEnForma(FachadaEnForma):
 
     def dar_reporte(self, id_persona):
         persona = self.dar_persona(id_persona)
+        imc = persona["peso"] / pow(persona["talla"], 2)
+        clasificacion = ""
+
+        if imc < 18.5:
+            clasificacion = "Bajo peso"
 
         return {
             "persona": persona,
             "estadisticas": {
                 "total_repeticiones": 0,
                 "total_calorias": 0,
+                "imc": imc,
+                "clasificacion": clasificacion,
                 "entrenamientos": []
             }
         }
