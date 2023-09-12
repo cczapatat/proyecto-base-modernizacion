@@ -1,7 +1,7 @@
 import datetime
 import unittest
 from faker import Faker
-from sqlalchemy import asc
+from sqlalchemy import asc, desc
 
 from src.logica.LogicaEnForma import LogicaEnForma
 from src.modelo.declarative_base import Session, Base, engine
@@ -155,6 +155,13 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.session.commit()
         self.session.close()
 
+    def obtener_persona_crear_entrenamiento(self):
+        id_persona = 0
+        return self.session.query(Persona).filter(Persona.nombre == self.personas_data_sorted[id_persona][0]).first()
+
+    def obtener_ejercicio_crear_entrenamiento(self):
+        return self.session.query(Ejercicio).first()
+
     def test_validar_ejercicio_nombre_vacio(self):
         resultado = self.logica.validar_crear_editar_ejercicio("", "", "", 0)
         self.assertEqual(resultado, "Error, el campo nombre esta vacio")
@@ -263,3 +270,85 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         result = self.logica.dar_persona(id_persona)
         self.assertEqual(persona.nombre, result["nombre"])
         self.assertEqual(persona.apellido, result["apellido"])
+
+    def test_validar_entrenamiento_diccionario_persona_vacio(self):
+        resultado = self.logica.validar_crear_editar_entrenamiento({}, "", "", "", "")
+        self.assertEqual(resultado, "Error, el diccionario persona esta vacio")
+
+    def test_validar_entrenamiento_ejercicio_vacio(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona, "", "", "", "")
+        self.assertEqual(resultado, "Error, el campo ejercicio esta vacio")
+
+    def test_validar_entrenamiento_fecha_vacio(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "", "", "")
+        self.assertEqual(resultado, "Error, el campo fecha esta vacio")
+
+    def test_validar_entrenamiento_fecha_formato_no_valido(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "fecha-erronea", "", "")
+        self.assertEqual(resultado, "Error, la fecha no es valida. Debe tener formato YYYY-MM-DD")
+
+    def test_validar_entrenamiento_fecha_no_valida(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2026-09-09", "", "")
+        self.assertEqual(resultado, "Error, la fecha ingresada debe ser igual o menor al dia de hoy")
+
+    def test_validar_entrenamiento_repeticiones_no_valido(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09", "", "")
+        self.assertEqual(resultado, "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero")
+
+    def test_validar_entrenamiento_repeticiones_numero_no_valido(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09", "-1", "")
+        self.assertEqual(resultado, "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero")
+
+    def test_validar_entrenamiento_tiempo_vacio(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09", "10", "")
+        self.assertEqual(resultado, "Error, el tiempo esta vacio")
+
+    def test_validar_entrenamiento_tiempo_formato_no_valido(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09",
+                                                                   "10", "tiempo_mal_formateado")
+        self.assertEqual(resultado, "Error, el tiempo no es valida. Debe tener formato hh:mm:ss")
+
+    def test_validar_entrenamiento_datos_validos(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09",
+                                                                   "10", "00:10:00")
+        self.assertEqual(resultado, "")
+
+    def test_crear_entrenamiento(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+        self.logica.crear_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09",
+                                                                   "10", "00:10:00")
+
+        entrenamiento =  self.session.query(EjercicioEntrenado).filter(
+            EjercicioEntrenado.persona_id == persona.id,
+            EjercicioEntrenado.ejercicio_id == ejercicio.id
+        ).order_by(desc("id")).first().__dict__
+
+        self.assertEqual(entrenamiento["fecha"], "2022-09-09")
+        self.assertEqual(entrenamiento["repeticiones"], 10)
+        self.assertEqual(entrenamiento["tiempo"], "00:10:00")

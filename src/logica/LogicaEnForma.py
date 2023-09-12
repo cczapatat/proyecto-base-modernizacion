@@ -6,6 +6,7 @@ from src.logica.FachadaEnForma import FachadaEnForma
 from src.modelo.declarative_base import session
 
 import validators
+import re
 
 from src.modelo.ejercicio import Ejercicio
 from src.modelo.persona import Persona
@@ -25,6 +26,14 @@ class LogicaEnForma(FachadaEnForma):
 
         return temporal_value
 
+    def es_diccionario_vacio(self, dict):
+        return bool(dict) is False
+
+    def obtener_fecha_de_string(self, str_fecha, formato):
+        return datetime.datetime.strptime(str_fecha, formato)
+
+    def fecha_menor_igual_dia_actual(self, fecha):
+        return fecha <= datetime.datetime.now()
 
     def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias):
         error = ""
@@ -85,6 +94,10 @@ class LogicaEnForma(FachadaEnForma):
 
         return True
 
+    def dar_ejercici_por_nombre (self, nombre_ejercicio):
+        return session.query(Ejercicio).filter(Ejercicio.nombre == nombre_ejercicio).first()
+
+
     def dar_ejercicios(self):
         ejercicios = session.query(Ejercicio).order_by(asc("nombre")).all()
         result = []
@@ -132,3 +145,63 @@ class LogicaEnForma(FachadaEnForma):
             key=lambda entrenamiento: (entrenamiento["fechaDate"], entrenamiento["ejercicio"]),
             reverse=True,
         )
+
+    def validar_crear_editar_entrenamiento(self, persona, ejercicio, fecha, repeticiones, tiempo):
+        error = ""
+        has_error = False
+        str_to_date = datetime.datetime.now()
+        repeticiones_to_int = 0
+
+        if self.es_diccionario_vacio(persona):
+            has_error = True
+            error = "Error, el diccionario persona esta vacio"
+
+        if not has_error and len(ejercicio) == 0:
+            has_error = True
+            error = "Error, el campo ejercicio esta vacio"
+
+        if not has_error and len(fecha) == 0:
+            has_error = True
+            error = "Error, el campo fecha esta vacio"
+
+        if not has_error:
+            try:
+                formato_dia = '%Y-%m-%d'
+                str_to_date = self.obtener_fecha_de_string(fecha, formato_dia)
+            except ValueError:
+                has_error = True
+                error = "Error, la fecha no es valida. Debe tener formato YYYY-MM-DD"
+
+        if not has_error and (not self.fecha_menor_igual_dia_actual(str_to_date)):
+            has_error = True
+            error = "Error, la fecha ingresada debe ser igual o menor al dia de hoy"
+
+        if not has_error:
+            try:
+                repeticiones_to_int = int(repeticiones)
+            except ValueError:
+                has_error = True
+                error = "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero"
+
+        if not has_error and repeticiones_to_int < 0:
+            has_error = True
+            error = "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero"
+
+        if not has_error and len(tiempo) == 0:
+            has_error = True
+            error = "Error, el tiempo esta vacio"
+
+        if not has_error and not re.findall("\d\d:\d\d:\d\d", tiempo):
+            error = "Error, el tiempo no es valida. Debe tener formato hh:mm:ss"
+
+        return error
+
+    def crear_entrenamiento(self, persona, ejercicio, fecha, repeticiones, tiempo):
+        objeto_ejercicio = self.dar_ejercici_por_nombre(ejercicio)
+
+        entrenamiento = EjercicioEntrenado(persona_id=persona["id"], ejercicio_id=objeto_ejercicio.id, fecha=fecha,
+                              repeticiones=repeticiones, tiempo=tiempo)
+        session.add(entrenamiento)
+        session.commit()
+
+        return True
