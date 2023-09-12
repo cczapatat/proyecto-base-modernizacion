@@ -178,6 +178,10 @@ class LogicaEnForma(FachadaEnForma):
                 error = "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero"
 
         if not has_error and repeticiones_to_int < 0:
+            has_error = True
             error = "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero"
+
+        if not has_error and len(tiempo) == 0:
+            error = "Error, el tiempo esta vacio"
 
         return error
