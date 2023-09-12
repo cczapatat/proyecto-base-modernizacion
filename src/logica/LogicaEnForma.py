@@ -209,7 +209,6 @@ class LogicaEnForma(FachadaEnForma):
     def dar_reporte(self, id_persona):
         persona = self.dar_persona(id_persona)
         imc = persona["peso"] / pow(persona["talla"], 2)
-        clasificacion = ""
 
         if imc < 18.5:
             clasificacion = "Bajo peso"
@@ -217,6 +216,8 @@ class LogicaEnForma(FachadaEnForma):
             clasificacion = "Peso saludable"
         elif 25 <= imc <= 29.9:
             clasificacion = "Sobrepeso"
+        else:
+            clasificacion = "Obesidad"
 
         return {
             "persona": persona,
