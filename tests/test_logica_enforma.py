@@ -1,7 +1,7 @@
 import datetime
 import unittest
 from faker import Faker
-from sqlalchemy import asc
+from sqlalchemy import asc, desc
 
 from src.logica.LogicaEnForma import LogicaEnForma
 from src.modelo.declarative_base import Session, Base, engine
@@ -332,3 +332,18 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09",
                                                                    "10", "00:10:00")
         self.assertEqual(resultado, "")
+
+    def test_crear_entrenamiento(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+        self.logica.crear_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09",
+                                                                   "10", "00:10:00")
+
+        entrenamiento =  self.session.query(EjercicioEntrenado).filter(
+            EjercicioEntrenado.persona_id == persona.id,
+            EjercicioEntrenado.ejercicio_id == ejercicio.id
+        ).order_by(desc("id")).first().__dict__
+
+        self.assertEqual(entrenamiento["fecha"], "2022-09-09")
+        self.assertEqual(entrenamiento["repeticiones"], 10)
+        self.assertEqual(entrenamiento["tiempo"], "00:10:00")
