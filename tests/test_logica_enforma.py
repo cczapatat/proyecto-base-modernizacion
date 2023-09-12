@@ -309,3 +309,10 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09", "-1", "")
         self.assertEqual(resultado, "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero")
+
+    def test_validar_entrenamiento_tiempo_vacio(self):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09", "10", "")
+        self.assertEqual(resultado, "Error, el tiempo esta vacio")
