@@ -184,6 +184,10 @@ class LogicaEnForma(FachadaEnForma):
             error = "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero"
 
         if not has_error and len(tiempo) == 0:
+            has_error = True
             error = "Error, el tiempo esta vacio"
+
+        if not has_error and not re.findall("\d\d:\d\d:\d\d", tiempo):
+            error = "Error, el tiempo no es valida. Debe tener formato hh:mm:ss"
 
         return error
