@@ -9,6 +9,7 @@ from src.modelo.ejercicio import Ejercicio
 from src.modelo.persona import Persona
 from src.modelo.ejercicioEntrenado import EjercicioEntrenado
 
+
 class LogicaEnFormaTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -126,14 +127,14 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             next(filter(lambda item: item[0] == persona.nombre, self.personas_data_sorted))
         )
 
-        return { "persona": persona, "id_persona": id_persona }
+        return {"persona": persona, "id_persona": id_persona}
 
     def init_entrenamientos(self):
         self.entrenamientos_data = []
         ejercicios = self.session.query(Ejercicio).order_by(asc("nombre")).limit(10).all()
         self.personaEntrenando = (self.session.query(Persona)
-                             .filter(Persona.nombre == self.personas_data_sorted[self.id_persona_entrenando][0])
-                             .first())
+                                  .filter(Persona.nombre == self.personas_data_sorted[self.id_persona_entrenando][0])
+                                  .first())
 
         for i in range(0, len(ejercicios)):
             value = i + 1
@@ -145,13 +146,14 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             fechaDate = datetime.datetime.strptime(fechaStr, "%Y-%m-%d")
 
             self.entrenamientos_data.append((
-                self.personaEntrenando.id, # 0
-                ejercicios[i].id, # 1
+                self.personaEntrenando.id,  # 0
+                ejercicios[i].id,  # 1
                 ejercicios[i].nombre,
-                fechaStr, # 3
+                fechaStr,  # 3
                 fechaDate,
-                self.data_faker.random_int(10, 1000), # 5
-                "{}:{}:{}".format(self.data_faker.random_int(0, 2), self.data_faker.random_int(0, 59), self.data_faker.random_int(1, 59)), # 6
+                self.data_faker.random_int(10, 1000),  # 5
+                "{}:{}:{}".format(self.data_faker.random_int(0, 2), self.data_faker.random_int(0, 59),
+                                  self.data_faker.random_int(1, 59)),  # 6
             ))
             self.session.add(EjercicioEntrenado(
                 persona_id=self.entrenamientos_data[i][0],
@@ -187,10 +189,10 @@ class LogicaEnFormaTestCase(unittest.TestCase):
             self.session.commit()
 
         historial = (self.session.query(
-                        EjercicioEntrenado,
-                        func.sum(EjercicioEntrenado.repeticiones),
-                        func.sum(EjercicioEntrenado.repeticiones * Ejercicio.calorias),
-                    )
+            EjercicioEntrenado,
+            func.sum(EjercicioEntrenado.repeticiones),
+            func.sum(EjercicioEntrenado.repeticiones * Ejercicio.calorias),
+        )
                      .join(Ejercicio, EjercicioEntrenado.ejercicio_id == Ejercicio.id)
                      .filter(EjercicioEntrenado.persona_id == id_persona)
                      .group_by("fecha").order_by(desc("fecha")).all())
@@ -240,7 +242,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(resultado, "Error, el campo nombre esta vacio")
 
     def test_validar_ejercicio_nombre_superar_longitud(self):
-        resultado = self.logica.validar_crear_editar_ejercicio(41*"Z", "", "", 0)
+        resultado = self.logica.validar_crear_editar_ejercicio(41 * "Z", "", "", 0)
         self.assertEqual(resultado, "Error, el campo nombre supera los 40 caracteres")
 
     def test_validar_ejercicio_descripcion_vacio(self):
@@ -248,7 +250,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(resultado, "Error, el campo descripcion esta vacio")
 
     def test_validar_ejercicio_descripcion_supera_longitud(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", 51*"Salto", "", 0)
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", 51 * "Salto", "", 0)
         self.assertEqual(resultado, "Error, el campo descripcion supera los 250 caracteres")
 
     def test_validar_ejercicio_enlace_vacio(self):
@@ -260,19 +262,23 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(resultado, "Error, el campo enlace es incorrecto")
 
     def test_validar_ejercicio_enlace_no_es_youtube(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://google.com/any", 0)
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://google.com/any",
+                                                               0)
         self.assertEqual(resultado, "Error, el campo enlace no es de Youtube")
 
     def test_validar_ejercicio_calorias_incorrectas(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://www.youtube.com/watch?v=bmNGEzHi4-s", "")
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion",
+                                                               "https://www.youtube.com/watch?v=bmNGEzHi4-s", "")
         self.assertEqual(resultado, "Error, el campo calorias debe ser un número entero")
 
     def test_validar_ejercicio_calorias_no_es_mayor_a_cero(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://www.youtube.com/watch?v=bmNGEzHi4-s", -1)
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion",
+                                                               "https://www.youtube.com/watch?v=bmNGEzHi4-s", -1)
         self.assertEqual(resultado, "Error, el campo calorias debe ser mayor a cero")
 
     def test_validar_ejercicio_nombre_duplicado(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Salto Lazo", "Saltar 15 veces", "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
+        resultado = self.logica.validar_crear_editar_ejercicio("Salto Lazo", "Saltar 15 veces",
+                                                               "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
         self.assertEqual(resultado, "Error, el ejericio Salto Lazo ya existe")
 
     def test_validar_ejercicio_exitoso(self):
@@ -283,7 +289,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def test_crear_ejercicio(self):
         self.logica.crear_ejercicio("Burpies", "Salto y Flexion", "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
 
-        ejercicio =  self.session.query(Ejercicio).filter(Ejercicio.nombre == "Burpies").first().__dict__
+        ejercicio = self.session.query(Ejercicio).filter(Ejercicio.nombre == "Burpies").first().__dict__
         self.assertEqual(ejercicio["nombre"], "Burpies")
         self.assertEqual(ejercicio["descripcion"], "Salto y Flexion")
         self.assertEqual(ejercicio["youtube"], "https://www.youtube.com/watch?v=bmNGEzHi4-s")
@@ -364,35 +370,40 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         persona = self.obtener_persona_crear_entrenamiento()
         ejercicio = self.obtener_ejercicio_crear_entrenamiento()
 
-        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "fecha-erronea", "", "")
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "fecha-erronea",
+                                                                   "", "")
         self.assertEqual(resultado, "Error, la fecha no es valida. Debe tener formato YYYY-MM-DD")
 
     def test_validar_entrenamiento_fecha_no_valida(self):
         persona = self.obtener_persona_crear_entrenamiento()
         ejercicio = self.obtener_ejercicio_crear_entrenamiento()
 
-        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2026-09-09", "", "")
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2026-09-09", "",
+                                                                   "")
         self.assertEqual(resultado, "Error, la fecha ingresada debe ser igual o menor al dia de hoy")
 
     def test_validar_entrenamiento_repeticiones_no_valido(self):
         persona = self.obtener_persona_crear_entrenamiento()
         ejercicio = self.obtener_ejercicio_crear_entrenamiento()
 
-        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09", "", "")
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09", "",
+                                                                   "")
         self.assertEqual(resultado, "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero")
 
     def test_validar_entrenamiento_repeticiones_numero_no_valido(self):
         persona = self.obtener_persona_crear_entrenamiento()
         ejercicio = self.obtener_ejercicio_crear_entrenamiento()
 
-        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09", "-1", "")
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09",
+                                                                   "-1", "")
         self.assertEqual(resultado, "Error, la cantidad de repeticiones debe ser un numero entero mayor a cero")
 
     def test_validar_entrenamiento_tiempo_vacio(self):
         persona = self.obtener_persona_crear_entrenamiento()
         ejercicio = self.obtener_ejercicio_crear_entrenamiento()
 
-        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09", "10", "")
+        resultado = self.logica.validar_crear_editar_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09",
+                                                                   "10", "")
         self.assertEqual(resultado, "Error, el tiempo esta vacio")
 
     def test_validar_entrenamiento_tiempo_formato_no_valido(self):
@@ -415,9 +426,9 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         persona = self.obtener_persona_crear_entrenamiento()
         ejercicio = self.obtener_ejercicio_crear_entrenamiento()
         self.logica.crear_entrenamiento(persona.__dict__, ejercicio.nombre, "2022-09-09",
-                                                                   "10", "00:10:00")
+                                        "10", "00:10:00")
 
-        entrenamiento =  self.session.query(EjercicioEntrenado).filter(
+        entrenamiento = self.session.query(EjercicioEntrenado).filter(
             EjercicioEntrenado.persona_id == persona.id,
             EjercicioEntrenado.ejercicio_id == ejercicio.id
         ).order_by(desc("id")).first().__dict__
@@ -427,7 +438,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(entrenamiento["tiempo"], "00:10:00")
 
     def test_generar_report_persona_sin_entrenamientos(self):
-        index = len(self.personas_data_sorted)-1
+        index = len(self.personas_data_sorted) - 1
         reporte = self.logica.dar_reporte(index)
         self.assertEqual(len(reporte["estadisticas"]["entrenamientos"]), 0)
         self.assertEqual(reporte["estadisticas"]["total_repeticiones"], 0)
