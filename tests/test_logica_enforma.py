@@ -209,7 +209,6 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.logica = None
-
         self.session = Session()
 
         ejerciciosEntrenados = self.session.query(EjercicioEntrenado).all()
@@ -262,28 +261,23 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(resultado, "Error, el campo enlace es incorrecto")
 
     def test_validar_ejercicio_enlace_no_es_youtube(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://google.com/any",
-                                                               0)
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://google.com/any",                                                    0)
         self.assertEqual(resultado, "Error, el campo enlace no es de Youtube")
 
     def test_validar_ejercicio_calorias_incorrectas(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion",
-                                                               "https://www.youtube.com/watch?v=bmNGEzHi4-s", "")
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion",                                                   "https://www.youtube.com/watch?v=bmNGEzHi4-s", "")
         self.assertEqual(resultado, "Error, el campo calorias debe ser un número entero")
 
     def test_validar_ejercicio_calorias_no_es_mayor_a_cero(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion",
-                                                               "https://www.youtube.com/watch?v=bmNGEzHi4-s", -1)
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion",                                                 "https://www.youtube.com/watch?v=bmNGEzHi4-s", -1)
         self.assertEqual(resultado, "Error, el campo calorias debe ser mayor a cero")
 
     def test_validar_ejercicio_nombre_duplicado(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Salto Lazo", "Saltar 15 veces",
-                                                               "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
+        resultado = self.logica.validar_crear_editar_ejercicio("Salto Lazo", "Saltar 15 veces",                                                  "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
         self.assertEqual(resultado, "Error, el ejericio Salto Lazo ya existe")
 
     def test_validar_ejercicio_exitoso(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Bupies", "Salto y Flexion",
-                                                               "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
+        resultado = self.logica.validar_crear_editar_ejercicio("Bupies", "Salto y Flexion",                                                   "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
         self.assertEqual(resultado, "")
 
     def test_crear_ejercicio(self):
