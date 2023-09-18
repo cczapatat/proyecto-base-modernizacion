@@ -222,11 +222,11 @@ class VistaListaEntrenamientos(QWidget):
         self.hide()
         self.interfaz.mostrar_vista_lista_personas()
 
-    def error_clave(self, error):
+    def error(self, error):
             mensaje_error=QMessageBox()
             mensaje_error.setIcon(QMessageBox.Question)
             mensaje_error.setText("Error : " + error)
-            mensaje_error.setWindowTitle("Error guardar clave")
+            mensaje_error.setWindowTitle("Error guardar entrenamiento")
             mensaje_error.setWindowIcon(QIcon("src/recursos/EnFormaLogo.png"))
             mensaje_error.setStandardButtons(QMessageBox.Ok ) 
             respuesta=mensaje_error.exec_()
