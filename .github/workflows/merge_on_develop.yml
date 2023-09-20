@@ -17,7 +17,7 @@ jobs:
       salida: ${{ steps.resultado_pruebas_exitoso.outputs.respuesta }}
       release: ${{ steps.mensaje_merge.outputs.respuesta }}
     env:
-      MENSAJE_MERGE: Merge to Develo (${{ github.ref_name }}))
+      MENSAJE_MERGE: Merge to Develop (${{ github.ref_name }})
     steps:
       - name: Checkout de repositorio
         uses: actions/checkout@v2
@@ -60,7 +60,9 @@ jobs:
           coverage report -m
       - name: crear mensaje merge
         if: ${{ contains(github.event.head_commit.message, '[Release]') }}
-        run: MENSAJE_MERGE="${MENSAJE_MERGE} - [Release]"
+        run: |
+          MENSAJE_MERGE="${MENSAJE_MERGE} - [Release]"
+          echo ${MENSAJE_MERGE}
       - name: guardar mensaje merge
         id: mensaje_merge
         run: echo "::set-output name=respuesta::${MENSAJE_MERGE}"
