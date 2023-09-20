@@ -65,7 +65,9 @@ jobs:
           echo ${MENSAJE_MERGE}
       - name: guardar mensaje merge
         id: mensaje_merge
-        run: echo "::set-output name=respuesta::${MENSAJE_MERGE}"
+        run: |
+          echo ${MENSAJE_MERGE}
+          echo "::set-output name=respuesta::${MENSAJE_MERGE}"
 
   merge_on_develop:
     name: Merge on Develop
