@@ -16,14 +16,15 @@ jobs:
     outputs:
       salida: ${{ steps.resultado_pruebas_exitoso.outputs.respuesta }}
     steps:
-      - name: Rebase develop -> ${{ github.ref }}
-        uses: tukasz/direct-merge-action@master
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          source-branch: develop
-          target-branch: ${{ github.ref }}
       - name: Checkout de repositorio
         uses: actions/checkout@v2
+      - name: merge
+        run: |
+          git fetch
+          git checkout refs/head/develop
+          git pull
+          git checkout ${{ github.ref }}
+          git merge develop
       - name: Configuración de entorno de python
         uses: actions/setup-python@v2
         with:
