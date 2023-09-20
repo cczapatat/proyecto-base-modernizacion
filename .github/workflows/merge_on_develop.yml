@@ -19,9 +19,11 @@ jobs:
       - name: Checkout de repositorio
         uses: actions/checkout@v2
       - name: Rebase develop -> ${{ github.ref }}
-        uses: peter-evans/rebase@v2
+        uses: tukasz/direct-merge-action@master
         with:
-          base: develop
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          source-branch: develop
+          target-branch: ${{ github.ref }}
       - name: Configuración de entorno de python
         uses: actions/setup-python@v2
         with:
