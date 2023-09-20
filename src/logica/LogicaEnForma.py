@@ -47,7 +47,6 @@ class LogicaEnForma(FachadaEnForma):
     def fecha_menor_igual_dia_actual(self, fecha):
         return fecha <= datetime.datetime.now()
 
-
     def tiempo_tiene_formato_valido(self, tiempo):
         return re.findall("\d\d:\d\d:\d\d", tiempo)
 
