@@ -44,6 +44,7 @@ class LogicaEnForma(FachadaEnForma):
     def obtener_fecha_de_string(self, str_fecha, formato):
         return datetime.datetime.strptime(str_fecha, formato)
 
+
     def fecha_menor_igual_dia_actual(self, fecha):
         return fecha <= datetime.datetime.now()
 
