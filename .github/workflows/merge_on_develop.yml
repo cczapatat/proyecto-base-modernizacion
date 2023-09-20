@@ -60,7 +60,7 @@ jobs:
           coverage report -m
       - name: crear mensaje merge
         if: ${{ contains(github.event.head_commit.message, '[Release]') }}
-        run: ${MENSAJE_MERGE}="${MENSAJE_MERGE} - [Release]"
+        run: MENSAJE_MERGE="${MENSAJE_MERGE} - [Release]"
       - name: guardar mensaje merge
         id: mensaje_merge
         run: echo "::set-output name=respuesta::${MENSAJE_MERGE}"
