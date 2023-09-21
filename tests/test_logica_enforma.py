@@ -559,12 +559,13 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         indice_ejercicio = 0
         ejercicio = self.ejercicios_data_sorted[indice_ejercicio]
         ejercicio_bd = self.session.query(Ejercicio).filter(Ejercicio.nombre == ejercicio[0]).first()
+        ejercicio_id = ejercicio_bd.id
 
         persona = self.session.query(Persona).order_by(asc("nombre")).limit(1).first()
 
         self.session.add(EjercicioEntrenado(
             persona_id=persona.id,
-            ejercicio_id=ejercicio_bd.id,
+            ejercicio_id=ejercicio_id,
             fecha="2023-09-21",
             repeticiones=100,
             tiempo="00:30:00",
@@ -572,7 +573,7 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.session.commit()
 
         result = self.logica.eliminar_ejercicio(indice_ejercicio)
-        ejercicio_no_eliminado = self.session.query(Ejercicio).filter(Ejercicio.id == ejercicio_bd.id).first()
+        ejercicio_no_eliminado = self.session.query(Ejercicio).filter(Ejercicio.id == ejercicio_id).first()
 
         self.assertEqual(result, False)
         self.assertEqual(ejercicio_bd.id, ejercicio_no_eliminado.id)
