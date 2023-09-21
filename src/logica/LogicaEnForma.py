@@ -282,3 +282,14 @@ class LogicaEnForma(FachadaEnForma):
         session.commit()
 
         return True
+
+    def eliminar_ejercicio(self, id_ejercicio):
+        ejercicios = self.dar_ejercicios()
+        ejercicio = ejercicios[id_ejercicio]
+
+        entrenamientos = session.query(EjercicioEntrenado).filter(EjercicioEntrenado.ejercicio_id == ejercicio["id"]).all()
+
+        if len(entrenamientos) == 0:
+            return True
+
+        return False
