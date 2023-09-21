@@ -276,6 +276,12 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         resultado = self.logica.validar_crear_editar_ejercicio("Salto Lazo", "Saltar 15 veces", "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10, -1)
         self.assertEqual(resultado, "Error, el ejericio Salto Lazo ya existe")
 
+    def test_validar_ejercicio_nombre_duplicado_edicion(self):
+        id_ejercicio = len(self.ejercicios_data_sorted) - 1
+        ejercicio = self.ejercicios_data_sorted[id_ejercicio]
+        resultado = self.logica.validar_crear_editar_ejercicio(ejercicio[0], "Saltar 15 veces", "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10, 0)
+        self.assertEqual(resultado, "Error, el ejericio " + ejercicio[0] + " ya existe")
+
     def test_validar_ejercicio_exitoso(self):
         resultado = self.logica.validar_crear_editar_ejercicio("Bupies", "Salto y Flexion", "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10, -1)
         self.assertEqual(resultado, "")
