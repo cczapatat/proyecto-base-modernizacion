@@ -16,8 +16,6 @@ jobs:
     outputs:
       salida: ${{ steps.resultado_pruebas_exitoso.outputs.respuesta }}
       release: ${{ steps.mensaje_merge.outputs.respuesta }}
-    env:
-      MENSAJE_MERGE: Merge to Develop (${{ github.ref_name }})
     steps:
       - name: Checkout de repositorio
         uses: actions/checkout@v2
@@ -61,7 +59,7 @@ jobs:
       - name: crear mensaje merge
         if: ${{ contains(github.event.head_commit.message, '[Release]') }}
         id: mensaje_merge
-        run: echo "::set-output name=respuesta::${MENSAJE_MERGE} - [Release]"
+        run: echo "::set-output name=respuesta::[Release]"
 
 
   merge_on_develop:
@@ -70,5 +68,12 @@ jobs:
     if: ${{ needs.push_and_rebase_on_branch.outputs.salida == 'Exito' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Mensaje Pre-Merge
+        run: echo "Merge to Develop ${{ github.ref_name }} ${{ needs.push_and_rebase_on_branch.outputs.release }}"
       - name: Mezcla ${{ github.ref }} -> develop
-        run: echo ${{ needs.push_and_rebase_on_branch.outputs.release }}
+        uses: tukasz/direct-merge-action@master
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          source-branch: ${{ github.ref }}
+          target-branch: develop
+          commit-message: "Merge to Develop ${{ github.ref_name }} ${{ needs.push_and_rebase_on_branch.outputs.release }}"
