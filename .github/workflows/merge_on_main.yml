@@ -74,3 +74,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           source-branch: release/v${{ needs.create_and_push_relase_branch.outputs.version }}
           target-branch: main
+      - name: Checkout de repositorio
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup user git
+        run: |
+          git config user.name "cparadac"
+          git config user.email "c.paradac@uniandes.edu.co"
+      - name: Crear tag sobre Main
+        run: |
+          git fetch
+          git checkout main
+          git branch --show-current
+          git pull
+          git tag v${{ needs.create_and_push_relase_branch.outputs.version }} HEAD -m "Version ${{ needs.create_and_push_relase_branch.outputs.version }} released"
+          git push origin v${{ needs.create_and_push_relase_branch.outputs.version }}
