@@ -536,10 +536,10 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         ejercicio = self.ejercicios_data_sorted[id_ejercicio]
         ejercicio_bd = self.session.query(Ejercicio).filter(Ejercicio.nombre == ejercicio[0]).first().__dict__
 
-        nombre = self.data_faker.unique.name(),
-        description = self.data_faker.text(max_nb_chars=250),
-        enlace = "https://www.youtube.com/watch?" + self.data_faker.name(),
-        calorias = self.data_faker.random_int(10, 200),
+        nombre = self.data_faker.unique.name()
+        description = self.data_faker.text(max_nb_chars=250)
+        enlace = "https://www.youtube.com/watch?" + self.data_faker.name()
+        calorias = self.data_faker.random_int(10, 200)
         self.logica.editar_ejercicio(id_ejercicio, nombre, description, enlace, calorias)
 
         ejercicio = self.session.query(Ejercicio).filter(Ejercicio.nombre == nombre).first().__dict__
