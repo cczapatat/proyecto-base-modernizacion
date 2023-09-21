@@ -60,14 +60,9 @@ jobs:
           coverage report -m
       - name: crear mensaje merge
         if: ${{ contains(github.event.head_commit.message, '[Release]') }}
-        run: |
-          MENSAJE_MERGE="${MENSAJE_MERGE} - [Release]"
-          echo ${MENSAJE_MERGE}
-      - name: guardar mensaje merge
         id: mensaje_merge
-        run: |
-          echo ${MENSAJE_MERGE}
-          echo "::set-output name=respuesta::${MENSAJE_MERGE}"
+        run: echo "::set-output name=respuesta::${MENSAJE_MERGE} - [Release]"
+
 
   merge_on_develop:
     name: Merge on Develop
@@ -76,9 +71,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Mezcla ${{ github.ref }} -> develop
-        uses: tukasz/direct-merge-action@master
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          source-branch: ${{ github.ref }}
-          target-branch: develop
-          commit-message: ${{ needs.push_and_rebase_on_branch.outputs.release }}
+        run: echo ${{ needs.push_and_rebase_on_branch.outputs.release }}
