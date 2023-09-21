@@ -24,8 +24,17 @@ class LogicaEnForma(FachadaEnForma):
     def es_enlace_youtube(self, enlace):
         return enlace.startswith("https://www.youtube.com/watch?")
 
-    def dar_ejercicios_por_nombre(self, nombre_ejercicio):
-        return session.query(Ejercicio).filter(Ejercicio.nombre == nombre_ejercicio).all()
+    def dar_ejercicios_por_nombre(self, nombre_ejercicio, id_ejercicio):
+        if id_ejercicio < 0:
+            return session.query(Ejercicio).filter(Ejercicio.nombre == nombre_ejercicio).all()
+        else:
+            ejercicios = self.dar_ejercicios()
+            ejercicio = ejercicios[id_ejercicio]
+
+            return session.query(Ejercicio).filter(
+                Ejercicio.id != ejercicio["id"],
+                Ejercicio.nombre == nombre_ejercicio
+            ).all()
 
     def dar_ejercicio_por_nombre(self, nombre_ejercicio):
         return session.query(Ejercicio).filter(Ejercicio.nombre == nombre_ejercicio).first()
@@ -66,7 +75,7 @@ class LogicaEnForma(FachadaEnForma):
 
         return clasificacion
 
-    def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias):
+    def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias, id_ejercicio):
         error = ""
         calorias_int = 0
 
@@ -100,7 +109,7 @@ class LogicaEnForma(FachadaEnForma):
         if not error and calorias_int <= 0:
             error = "Error, el campo calorias debe ser mayor a cero"
 
-        ejercicios_por_nombre = self.dar_ejercicios_por_nombre(nombre)
+        ejercicios_por_nombre = self.dar_ejercicios_por_nombre(nombre, id_ejercicio)
 
         if not error and len(ejercicios_por_nombre) > 0:
             error = "Error, el ejericio " + nombre + " ya existe"
@@ -260,3 +269,16 @@ class LogicaEnForma(FachadaEnForma):
                 "entrenamientos": entrenamientos_data
             }
         }
+
+    def editar_ejercicio(self, id_ejercicio, nombre, descripcion, enlace, calorias):
+        ejercicios = self.dar_ejercicios()
+        ejercicio = ejercicios[id_ejercicio]
+
+        ejercicio_bd = session.query(Ejercicio).filter(Ejercicio.id == ejercicio["id"]).first()
+        ejercicio_bd.nombre = nombre
+        ejercicio_bd.descripcion = descripcion
+        ejercicio_bd.youtube = enlace
+        ejercicio_bd.calorias = calorias
+        session.commit()
+
+        return True

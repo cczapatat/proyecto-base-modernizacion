@@ -78,7 +78,7 @@ class App_EnForma(QApplication):
         """
         Esta función permite crear un nuevo ejercicio
         """
-        validacion = self.logica.validar_crear_editar_ejercicio(nombre, descripcion, enlace, calorias)
+        validacion = self.logica.validar_crear_editar_ejercicio(nombre, descripcion, enlace, calorias, -1)
         if validacion == "":
             self.logica.crear_ejercicio(nombre, descripcion, enlace, calorias)
         else:
@@ -90,7 +90,7 @@ class App_EnForma(QApplication):
         """
         Esta función permite editar un ejercicio
         """
-        validacion = self.logica.validar_crear_editar_ejercicio(nombre, descripcion, enlace, calorias)
+        validacion = self.logica.validar_crear_editar_ejercicio(nombre, descripcion, enlace, calorias, id)
         if validacion == "":
             self.logica.editar_ejercicio(id, nombre, descripcion, enlace, calorias)
         else:
