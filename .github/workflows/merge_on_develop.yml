@@ -16,8 +16,6 @@ jobs:
     outputs:
       salida: ${{ steps.resultado_pruebas_exitoso.outputs.respuesta }}
       release: ${{ steps.mensaje_merge.outputs.respuesta }}
-    env:
-      MENSAJE_MERGE: Merge to Develop (${{ github.ref_name }})
     steps:
       - name: Checkout de repositorio
         uses: actions/checkout@v2
@@ -60,14 +58,9 @@ jobs:
           coverage report -m
       - name: crear mensaje merge
         if: ${{ contains(github.event.head_commit.message, '[Release]') }}
-        run: |
-          MENSAJE_MERGE="${MENSAJE_MERGE} - [Release]"
-          echo ${MENSAJE_MERGE}
-      - name: guardar mensaje merge
         id: mensaje_merge
-        run: |
-          echo ${MENSAJE_MERGE}
-          echo "::set-output name=respuesta::${MENSAJE_MERGE}"
+        run: echo "::set-output name=respuesta::[Release]"
+
 
   merge_on_develop:
     name: Merge on Develop
@@ -75,10 +68,12 @@ jobs:
     if: ${{ needs.push_and_rebase_on_branch.outputs.salida == 'Exito' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Mensaje Pre-Merge
+        run: echo "Merge to Develop ${{ github.ref_name }} ${{ needs.push_and_rebase_on_branch.outputs.release }}"
       - name: Mezcla ${{ github.ref }} -> develop
         uses: tukasz/direct-merge-action@master
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           source-branch: ${{ github.ref }}
           target-branch: develop
-          commit-message: ${{ needs.push_and_rebase_on_branch.outputs.release }}
+          commit-message: "Merge to Develop ${{ github.ref_name }} ${{ needs.push_and_rebase_on_branch.outputs.release }}"
