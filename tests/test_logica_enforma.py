@@ -554,3 +554,29 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(ejercicio["descripcion"], description)
         self.assertEqual(ejercicio["youtube"], enlace)
         self.assertEqual(ejercicio["calorias"], calorias)
+
+    def test_no_eliminar_ejercicio_asociado_a_entrenamiento(self):
+        indice_ejercicio = 0
+        ejercicio = self.ejercicios_data_sorted[indice_ejercicio]
+        ejercicio_bd = self.session.query(Ejercicio).filter(Ejercicio.nombre == ejercicio[0]).first()
+
+        persona = self.session.query(Persona).order_by(asc("nombre")).limit(1).first()
+
+        self.session.add(EjercicioEntrenado(
+            persona_id=persona.id,
+            ejercicio_id=ejercicio_bd.id,
+            fecha="2023-09-21",
+            repeticiones=100,
+            tiempo="00:30:00",
+        ))
+        self.session.commit()
+
+        result = self.logica.eliminar_ejercicio(indice_ejercicio)
+        ejercicio_no_eliminado = self.session.query(Ejercicio).filter(Ejercicio.id == ejercicio_bd.id).first()
+
+        self.assertEqual(result, False)
+        self.assertEqual(ejercicio_bd.id, ejercicio_no_eliminado.id)
+        self.assertEqual(ejercicio_bd.nombre, ejercicio_no_eliminado.nombre)
+
+
+
