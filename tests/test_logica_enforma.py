@@ -530,3 +530,21 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(reporte["persona"]["nombre"], persona.nombre)
         self.assertEqual(reporte["persona"]["talla"], persona.talla)
         self.assertEqual(reporte["persona"]["peso"], persona.peso)
+
+    def test_editar_ejercicio(self):
+        id_ejercicio = len(self.ejercicios_data_sorted) - 1
+        ejercicio = self.ejercicios_data_sorted[id_ejercicio]
+        ejercicio_bd = self.session.query(Ejercicio).filter(Ejercicio.nombre == ejercicio[0]).first().__dict__
+
+        nombre = self.data_faker.unique.name(),
+        description = self.data_faker.text(max_nb_chars=250),
+        enlace = "https://www.youtube.com/watch?" + self.data_faker.name(),
+        calorias = self.data_faker.random_int(10, 200),
+        self.logica.editar_ejercicio(id_ejercicio, nombre, description, enlace, calorias)
+
+        ejercicio = self.session.query(Ejercicio).filter(Ejercicio.nombre == nombre).first().__dict__
+        self.assertEqual(ejercicio["id"], ejercicio_bd["id"])
+        self.assertEqual(ejercicio["nombre"], nombre)
+        self.assertEqual(ejercicio["descripcion"], description)
+        self.assertEqual(ejercicio["youtube"], enlace)
+        self.assertEqual(ejercicio["calorias"], calorias)
