@@ -1,0 +1,35 @@
+name: Merge sobre Main.
+on:
+  push:
+    branches:
+      - 'develop'
+jobs:
+  push_and_rebase_on_develop:
+    name: Push and Rebase on Branch
+    if: ${{ contains(github.event.head_commit.message, '[Release]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout de repositorio
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup user git
+        run: |
+          git config user.name "cparadac"
+          git config user.email "c.paradac@uniandes.edu.co"
+      - name: Minor version for each merge
+        id: taggerDryRun
+        uses: anothrNick/github-tag-action@1.64.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: false
+          DRY_RUN: true
+      - name: echo new tag
+        run: |
+          echo "The next tag version will be: ${{ steps.taggerDryRun.outputs.new_tag }}"
+      - name: echo tag
+        run: |
+          echo "The current tag is: ${{ steps.taggerDryRun.outputs.tag }}"
+      - name: echo part
+        run: |
+          echo "The version increment was: ${{ steps.taggerDryRun.outputs.part }}"
