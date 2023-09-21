@@ -1,0 +1,79 @@
+name: Merge sobre Develop.
+on:
+  push:
+    branches:
+      - 'feature/HU**'
+      - 'fix/HU**'
+jobs:
+  push_and_rebase_on_branch:
+    name: Push and Rebase on Branch
+    if: ${{ contains(github.event.head_commit.message, '[Final_Commit]')
+      && contains(github.event.head_commit.message, '[HU')
+      && (contains(github.event.head_commit.message, '(Verde)')
+      || contains(github.event.head_commit.message, '(Azul)'))
+      }}
+    runs-on: ubuntu-latest
+    outputs:
+      salida: ${{ steps.resultado_pruebas_exitoso.outputs.respuesta }}
+      release: ${{ steps.mensaje_merge.outputs.respuesta }}
+    steps:
+      - name: Checkout de repositorio
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup user git
+        run: |
+          git config user.name "cczapatat"
+          git config user.email "c.zapatat@uniandes.edu.co"
+      - name: merge develop to ${{ github.ref }} (${{ github.ref_name }})
+        run: |
+          git fetch
+          git checkout develop
+          git branch --show-current
+          git pull
+          git checkout ${{ github.ref_name }}
+          git merge develop
+      - name: Configuración de entorno de python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: Instalación de librerías y dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Correr pruebas
+        id: correr-pruebas
+        run: python -m unittest discover -s tests -v
+      - name: Validar resultado con errores
+        if: ${{ failure() }}
+        run: echo "Una o varias pruebas fallaron"
+      - name: Validar resultado sin errores
+        id: resultado_pruebas_exitoso
+        if: ${{ success() }}
+        run: echo "::set-output name=respuesta::Exito"
+      - name: Cálculo de cubrimiento
+        id: cubrimiento
+        run: |
+          coverage run -m unittest discover -s tests -v
+          coverage report -m
+      - name: crear mensaje merge
+        if: ${{ contains(github.event.head_commit.message, '[Release]') }}
+        id: mensaje_merge
+        run: echo "::set-output name=respuesta::[Release]"
+
+
+  merge_on_develop:
+    name: Merge on Develop
+    needs: push_and_rebase_on_branch
+    if: ${{ needs.push_and_rebase_on_branch.outputs.salida == 'Exito' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mensaje Pre-Merge
+        run: echo "Merge to Develop - ${{ github.ref_name }} ${{ needs.push_and_rebase_on_branch.outputs.release }}"
+      - name: Mezcla ${{ github.ref }} -> develop
+        uses: tukasz/direct-merge-action@master
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          source-branch: ${{ github.ref }}
+          target-branch: develop
+          commit-message: "Merge to Develop - ${{ github.ref_name }} ${{ needs.push_and_rebase_on_branch.outputs.release }}"
