@@ -317,6 +317,7 @@ class LogicaEnForma(FachadaEnForma):
         entrenamiento = ejercicio_entrenado[0]
         entrenamiento.tiempo = tiempo
         entrenamiento.repeticiones = repeticiones
+        entrenamiento.fecha = fecha
 
         session.commit()
 
