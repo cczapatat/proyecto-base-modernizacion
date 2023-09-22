@@ -236,6 +236,18 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def obtener_ejercicio_crear_entrenamiento(self):
         return self.session.query(Ejercicio).first()
 
+    def obtener_informacion_para_editar_entrenamiento(self, entrenamiento_index):
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+        entrenamiento = self.session.query(EjercicioEntrenado).filter(
+            EjercicioEntrenado.ejercicio_id == self.entrenamientos_data_sorted[entrenamiento_index][1]).first().__dict__
+
+        return {
+            "persona": persona,
+            "ejercicio": ejercicio,
+            "entrenamiento": entrenamiento
+        }
+
     def test_validar_ejercicio_nombre_vacio(self):
         resultado = self.logica.validar_crear_editar_ejercicio("", "", "", 0, -1)
         self.assertEqual(resultado, "Error, el campo nombre esta vacio")
@@ -608,9 +620,11 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def test_editar_entrenamiento_tiempo(self):
         id_entrenamiento = len(self.entrenamientos_data_sorted) - 1
         tiempo_a_editar = "00:20:00"
-        persona = self.obtener_persona_crear_entrenamiento()
-        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
-        entrenamiento = self.session.query(EjercicioEntrenado).filter(EjercicioEntrenado.ejercicio_id == self.entrenamientos_data_sorted[id_entrenamiento][1]).first().__dict__
+
+        editar_entrenamiento_data = self.obtener_informacion_para_editar_entrenamiento(id_entrenamiento)
+        entrenamiento = editar_entrenamiento_data["entrenamiento"]
+        persona = editar_entrenamiento_data["persona"]
+        ejercicio = editar_entrenamiento_data["ejercicio"]
 
         self.assertEqual(entrenamiento["tiempo"], self.entrenamientos_data_sorted[id_entrenamiento][6])
 
@@ -625,9 +639,11 @@ class LogicaEnFormaTestCase(unittest.TestCase):
     def test_editar_entrenamiento_repeticiones(self):
         id_entrenamiento = len(self.entrenamientos_data_sorted) - 1
         repeticiones_a_editar = 50
-        persona = self.obtener_persona_crear_entrenamiento()
-        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
-        entrenamiento = self.session.query(EjercicioEntrenado).filter(EjercicioEntrenado.ejercicio_id == self.entrenamientos_data_sorted[id_entrenamiento][1]).first().__dict__
+
+        editar_entrenamiento_data = self.obtener_informacion_para_editar_entrenamiento(id_entrenamiento)
+        entrenamiento = editar_entrenamiento_data["entrenamiento"]
+        persona = editar_entrenamiento_data["persona"]
+        ejercicio = editar_entrenamiento_data["ejercicio"]
 
         self.assertEqual(entrenamiento["repeticiones"], self.entrenamientos_data_sorted[id_entrenamiento][5])
 
