@@ -654,3 +654,22 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         ).order_by(desc("id")).first().__dict__
 
         self.assertEqual(entrenamiento["repeticiones"], repeticiones_a_editar)
+
+    def test_editar_entrenamiento_fecha(self):
+        id_entrenamiento = len(self.entrenamientos_data_sorted) - 1
+        fecha_a_editar =(datetime.datetime.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+
+        editar_entrenamiento_data = self.obtener_informacion_para_editar_entrenamiento(id_entrenamiento)
+        entrenamiento = editar_entrenamiento_data["entrenamiento"]
+        persona = editar_entrenamiento_data["persona"]
+        ejercicio = editar_entrenamiento_data["ejercicio"]
+
+        self.assertEqual(entrenamiento["fecha"], self.entrenamientos_data_sorted[id_entrenamiento][4].strftime("%Y-%m-%d"))
+
+        self.logica.editar_entrenamiento(id_entrenamiento, persona.__dict__, ejercicio.nombre, fecha_a_editar,  entrenamiento["repeticiones"],  entrenamiento["tiempo"])
+
+        entrenamiento = self.session.query(EjercicioEntrenado).filter(
+            EjercicioEntrenado.id == entrenamiento["id"],
+        ).order_by(desc("id")).first().__dict__
+
+        self.assertEqual(entrenamiento["fecha"], fecha_a_editar)
