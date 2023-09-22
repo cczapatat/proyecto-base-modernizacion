@@ -313,11 +313,13 @@ class LogicaEnForma(FachadaEnForma):
         ejercicio_entrenado = next(
             filter(lambda item: item.EjercicioEntrenado.id == ejercicio_entrenado_sorted[id_entrenamiento]["id"],
                    ejercicios_entrenados))
+        ejercicio_por_nombre = self.dar_ejercicio_por_nombre(ejercicio)
 
         entrenamiento = ejercicio_entrenado[0]
         entrenamiento.tiempo = tiempo
         entrenamiento.repeticiones = repeticiones
         entrenamiento.fecha = fecha
+        entrenamiento.ejercicio_id = ejercicio_por_nombre.id
 
         session.commit()
 
