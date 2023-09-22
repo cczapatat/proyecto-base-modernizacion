@@ -75,6 +75,24 @@ class LogicaEnForma(FachadaEnForma):
 
         return clasificacion
 
+    def dar_ejercicios_entrenado_por_persona_id_entrenamiento_indice(self, persona_id, entrenamiento_indice):
+        ejercicios_entrenados = self.dar_ejercicio_entrenados_por_persona_id(persona_id)
+        result = []
+        for ejercicio_entrenado in ejercicios_entrenados:
+            result.append(self.mapear_objeto_entrenamiento(ejercicio_entrenado))
+
+        ejercicio_entrenado_sorted = sorted(
+            result,
+            key=lambda entrenamiento: (entrenamiento["fechaDate"], entrenamiento["ejercicio"]),
+            reverse=True,
+        )
+
+        ejercicio_entrenado = next(
+            filter(lambda item: item.EjercicioEntrenado.id == ejercicio_entrenado_sorted[entrenamiento_indice]["id"],
+                   ejercicios_entrenados))
+
+        return ejercicio_entrenado[0]
+
     def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias, id_ejercicio):
         error = ""
         calorias_int = 0
@@ -298,24 +316,12 @@ class LogicaEnForma(FachadaEnForma):
         return False
 
     def editar_entrenamiento(self, id_entrenamiento, persona, ejercicio, fecha, repeticiones, tiempo):
-        result = []
-
-        ejercicios_entrenados = self.dar_ejercicio_entrenados_por_persona_id(persona["id"])
-        for ejercicio_entrenado in ejercicios_entrenados:
-            result.append(self.mapear_objeto_entrenamiento(ejercicio_entrenado))
-
-        ejercicio_entrenado_sorted = sorted(
-            result,
-            key=lambda entrenamiento: (entrenamiento["fechaDate"], entrenamiento["ejercicio"]),
-            reverse=True,
+        entrenamiento = self.dar_ejercicios_entrenado_por_persona_id_entrenamiento_indice(
+            persona["id"],
+            id_entrenamiento
         )
-
-        ejercicio_entrenado = next(
-            filter(lambda item: item.EjercicioEntrenado.id == ejercicio_entrenado_sorted[id_entrenamiento]["id"],
-                   ejercicios_entrenados))
         ejercicio_por_nombre = self.dar_ejercicio_por_nombre(ejercicio)
 
-        entrenamiento = ejercicio_entrenado[0]
         entrenamiento.tiempo = tiempo
         entrenamiento.repeticiones = repeticiones
         entrenamiento.fecha = fecha

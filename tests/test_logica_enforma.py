@@ -655,7 +655,14 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         self.assertEqual(entrenamiento["tiempo"], self.entrenamientos_data_sorted[id_entrenamiento][6])
 
-        self.logica.editar_entrenamiento(id_entrenamiento, persona.__dict__, ejercicio.nombre, entrenamiento["fecha"],  entrenamiento["repeticiones"],  tiempo_a_editar)
+        self.logica.editar_entrenamiento(
+            id_entrenamiento,
+            persona.__dict__,
+            ejercicio.nombre,
+            entrenamiento["fecha"],
+            entrenamiento["repeticiones"],
+            tiempo_a_editar
+        )
 
         entrenamiento = self.session.query(EjercicioEntrenado).filter(
             EjercicioEntrenado.id == entrenamiento["id"],
@@ -674,7 +681,14 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         self.assertEqual(entrenamiento["repeticiones"], self.entrenamientos_data_sorted[id_entrenamiento][5])
 
-        self.logica.editar_entrenamiento(id_entrenamiento, persona.__dict__, ejercicio.nombre, entrenamiento["fecha"],  repeticiones_a_editar,  entrenamiento["tiempo"])
+        self.logica.editar_entrenamiento(
+            id_entrenamiento,
+            persona.__dict__,
+            ejercicio.nombre,
+            entrenamiento["fecha"],
+            repeticiones_a_editar,
+            entrenamiento["tiempo"]
+        )
 
         entrenamiento = self.session.query(EjercicioEntrenado).filter(
             EjercicioEntrenado.id == entrenamiento["id"],
@@ -693,7 +707,14 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         self.assertEqual(entrenamiento["fecha"], self.entrenamientos_data_sorted[id_entrenamiento][4].strftime("%Y-%m-%d"))
 
-        self.logica.editar_entrenamiento(id_entrenamiento, persona.__dict__, ejercicio.nombre, fecha_a_editar,  entrenamiento["repeticiones"],  entrenamiento["tiempo"])
+        self.logica.editar_entrenamiento(
+            id_entrenamiento,
+            persona.__dict__,
+            ejercicio.nombre,
+            fecha_a_editar,
+            entrenamiento["repeticiones"],
+            entrenamiento["tiempo"]
+        )
 
         entrenamiento = self.session.query(EjercicioEntrenado).filter(
             EjercicioEntrenado.id == entrenamiento["id"],
@@ -717,7 +738,14 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         self.assertEqual(entrenamiento["ejercicio_id"], ejercicio.id)
 
-        self.logica.editar_entrenamiento(id_entrenamiento, persona.__dict__, ejercicio_a_editar["ejercicio"].nombre, entrenamiento["fecha"],   entrenamiento["repeticiones"],  entrenamiento["tiempo"])
+        self.logica.editar_entrenamiento(
+            id_entrenamiento,
+            persona.__dict__,
+            ejercicio_a_editar["ejercicio"].nombre,
+            entrenamiento["fecha"],
+            entrenamiento["repeticiones"],
+            entrenamiento["tiempo"]
+        )
 
         entrenamiento = self.session.query(EjercicioEntrenado).filter(
             EjercicioEntrenado.id == entrenamiento["id"],
