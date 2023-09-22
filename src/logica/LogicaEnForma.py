@@ -137,8 +137,10 @@ class LogicaEnForma(FachadaEnForma):
 
     def dar_persona(self, id_persona):
         personas = self.dar_personas()
+        persona = personas[id_persona]
+        persona["indice"] = id_persona
 
-        return personas[id_persona]
+        return persona
 
     def dar_ejercicio_entrenados_por_persona_id(self, person_id):
         return ((session.query(EjercicioEntrenado, Ejercicio)
@@ -260,3 +262,33 @@ class LogicaEnForma(FachadaEnForma):
                 "entrenamientos": entrenamientos_data
             }
         }
+
+    def editar_entrenamiento(self, id_entrenamiento, persona, ejercicio, fecha, repeticiones, tiempo):
+        result = []
+
+        ejercicios_entrenados = self.dar_ejercicio_entrenados_por_persona_id(persona["id"])
+        for ejercicio_entrenado in ejercicios_entrenados:
+            result.append(self.mapear_objeto_entrenamiento(ejercicio_entrenado))
+
+        ejercicio_entrenado_sorted = sorted(
+            result,
+            key=lambda entrenamiento: (entrenamiento["fechaDate"], entrenamiento["ejercicio"]),
+            reverse=True,
+        )
+
+        ejercicio_entrenado = next(
+            filter(lambda item: item.EjercicioEntrenado.id == ejercicio_entrenado_sorted[id_entrenamiento]["id"],
+                   ejercicios_entrenados))
+
+        entrenamiento =  ejercicio_entrenado[0]
+
+        ejercicio_por_nombre = self.dar_ejercicio_por_nombre(ejercicio)
+
+        entrenamiento.ejercicio_id = ejercicio_por_nombre.id
+        entrenamiento.fecha = fecha
+        entrenamiento.repeticiones = repeticiones
+        entrenamiento.tiempo = tiempo
+
+        session.commit()
+
+        return True
