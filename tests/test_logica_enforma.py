@@ -129,6 +129,31 @@ class LogicaEnFormaTestCase(unittest.TestCase):
 
         return {"persona": persona, "id_persona": id_persona}
 
+    def agregar_ejercicio(self, nombre, descripcion, enlace_youtube, calorias):
+        ejercicio = Ejercicio(
+            nombre=nombre,
+            descripcion=descripcion,
+            youtube=enlace_youtube,
+            calorias=int(calorias)
+        )
+        self.session.add(ejercicio)
+        self.session.commit()
+
+        self.ejercicios_data_sorted.append((
+            ejercicio.nombre,
+            ejercicio.descripcion,
+            ejercicio.youtube,
+            ejercicio.calorias
+        ))
+        self.ejercicios_data_sorted = sorted(self.ejercicios_data_sorted, key=lambda ejercicio: ejercicio[0])
+
+        id_ejercicio = self.ejercicios_data_sorted.index(
+            next(filter(lambda item: item[0] == ejercicio.nombre, self.ejercicios_data_sorted))
+        )
+
+        return {"ejercicio": ejercicio, "id_ejercicio": id_ejercicio}
+
+
     def init_entrenamientos(self):
         self.entrenamientos_data = []
         ejercicios = self.session.query(Ejercicio).order_by(asc("nombre")).limit(10).all()
@@ -237,10 +262,12 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         return self.session.query(Ejercicio).first()
 
     def obtener_informacion_para_editar_entrenamiento(self, entrenamiento_index):
+        ejercicio_id = self.entrenamientos_data_sorted[entrenamiento_index][1]
+
         persona = self.obtener_persona_crear_entrenamiento()
-        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+        ejercicio = self.session.query(Ejercicio).filter(Ejercicio.id == ejercicio_id).first()
         entrenamiento = self.session.query(EjercicioEntrenado).filter(
-            EjercicioEntrenado.ejercicio_id == self.entrenamientos_data_sorted[entrenamiento_index][1]).first().__dict__
+            EjercicioEntrenado.ejercicio_id == ejercicio_id).first().__dict__
 
         return {
             "persona": persona,
@@ -673,3 +700,27 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         ).order_by(desc("id")).first().__dict__
 
         self.assertEqual(entrenamiento["fecha"], fecha_a_editar)
+
+    def test_editar_entrenamiento_ejercicio(self):
+        id_entrenamiento = len(self.entrenamientos_data_sorted) - 1
+        ejercicio_a_editar = self.agregar_ejercicio(
+            self.data_faker.unique.name(),
+            self.data_faker.text(max_nb_chars=250),
+            "https://www.youtube.com/watch?" + self.data_faker.name(),
+            self.data_faker.random_int(10, 1000)
+        )
+
+        editar_entrenamiento_data = self.obtener_informacion_para_editar_entrenamiento(id_entrenamiento)
+        entrenamiento = editar_entrenamiento_data["entrenamiento"]
+        persona = editar_entrenamiento_data["persona"]
+        ejercicio = editar_entrenamiento_data["ejercicio"]
+
+        self.assertEqual(entrenamiento["ejercicio_id"], ejercicio.id)
+
+        self.logica.editar_entrenamiento(id_entrenamiento, persona.__dict__, ejercicio_a_editar["ejercicio"].nombre, entrenamiento["fecha"],   entrenamiento["repeticiones"],  entrenamiento["tiempo"])
+
+        entrenamiento = self.session.query(EjercicioEntrenado).filter(
+            EjercicioEntrenado.id == entrenamiento["id"],
+        ).order_by(desc("id")).first().__dict__
+
+        self.assertEqual(entrenamiento["ejercicio_id"], ejercicio_a_editar["ejercicio"].id)
