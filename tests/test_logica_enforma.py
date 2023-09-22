@@ -237,47 +237,53 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         return self.session.query(Ejercicio).first()
 
     def test_validar_ejercicio_nombre_vacio(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("", "", "", 0)
+        resultado = self.logica.validar_crear_editar_ejercicio("", "", "", 0, -1)
         self.assertEqual(resultado, "Error, el campo nombre esta vacio")
 
     def test_validar_ejercicio_nombre_superar_longitud(self):
-        resultado = self.logica.validar_crear_editar_ejercicio(41 * "Z", "", "", 0)
+        resultado = self.logica.validar_crear_editar_ejercicio(41 * "Z", "", "", 0, -1)
         self.assertEqual(resultado, "Error, el campo nombre supera los 40 caracteres")
 
     def test_validar_ejercicio_descripcion_vacio(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "", "", 0)
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "", "", 0, 1)
         self.assertEqual(resultado, "Error, el campo descripcion esta vacio")
 
     def test_validar_ejercicio_descripcion_supera_longitud(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", 51 * "Salto", "", 0)
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", 51 * "Salto", "", 0, 1)
         self.assertEqual(resultado, "Error, el campo descripcion supera los 250 caracteres")
 
     def test_validar_ejercicio_enlace_vacio(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "", 0)
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "", 0, -1)
         self.assertEqual(resultado, "Error, el campo enlace esta vacio")
 
     def test_validar_ejercicio_enlace_incorrecto(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "incorrecto", 0)
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "incorrecto", 0, 1)
         self.assertEqual(resultado, "Error, el campo enlace es incorrecto")
 
     def test_validar_ejercicio_enlace_no_es_youtube(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://google.com/any",                                                    0)
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://google.com/any", 0, -1)
         self.assertEqual(resultado, "Error, el campo enlace no es de Youtube")
 
     def test_validar_ejercicio_calorias_incorrectas(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion",                                                   "https://www.youtube.com/watch?v=bmNGEzHi4-s", "")
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://www.youtube.com/watch?v=bmNGEzHi4-s", "", -1)
         self.assertEqual(resultado, "Error, el campo calorias debe ser un número entero")
 
     def test_validar_ejercicio_calorias_no_es_mayor_a_cero(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion",                                                 "https://www.youtube.com/watch?v=bmNGEzHi4-s", -1)
+        resultado = self.logica.validar_crear_editar_ejercicio("Burpies", "Salto y Flexion", "https://www.youtube.com/watch?v=bmNGEzHi4-s", -1, -1)
         self.assertEqual(resultado, "Error, el campo calorias debe ser mayor a cero")
 
     def test_validar_ejercicio_nombre_duplicado(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Salto Lazo", "Saltar 15 veces",                                                  "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
+        resultado = self.logica.validar_crear_editar_ejercicio("Salto Lazo", "Saltar 15 veces", "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10, -1)
         self.assertEqual(resultado, "Error, el ejericio Salto Lazo ya existe")
 
+    def test_validar_ejercicio_nombre_duplicado_edicion(self):
+        id_ejercicio = len(self.ejercicios_data_sorted) - 1
+        ejercicio = self.ejercicios_data_sorted[id_ejercicio]
+        resultado = self.logica.validar_crear_editar_ejercicio(ejercicio[0], "Saltar 15 veces", "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10, 0)
+        self.assertEqual(resultado, "Error, el ejericio " + ejercicio[0] + " ya existe")
+
     def test_validar_ejercicio_exitoso(self):
-        resultado = self.logica.validar_crear_editar_ejercicio("Bupies", "Salto y Flexion",                                                   "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10)
+        resultado = self.logica.validar_crear_editar_ejercicio("Bupies", "Salto y Flexion", "https://www.youtube.com/watch?v=bmNGEzHi4-s", 10, -1)
         self.assertEqual(resultado, "")
 
     def test_crear_ejercicio(self):
@@ -530,6 +536,74 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         self.assertEqual(reporte["persona"]["nombre"], persona.nombre)
         self.assertEqual(reporte["persona"]["talla"], persona.talla)
         self.assertEqual(reporte["persona"]["peso"], persona.peso)
+
+    def test_editar_ejercicio(self):
+        id_ejercicio = len(self.ejercicios_data_sorted) - 1
+        ejercicio = self.ejercicios_data_sorted[id_ejercicio]
+        ejercicio_bd = self.session.query(Ejercicio).filter(Ejercicio.nombre == ejercicio[0]).first().__dict__
+
+        nombre = self.data_faker.unique.name()
+        description = self.data_faker.text(max_nb_chars=250)
+        enlace = "https://www.youtube.com/watch?" + self.data_faker.name()
+        calorias = self.data_faker.random_int(10, 200)
+        self.logica.editar_ejercicio(id_ejercicio, nombre, description, enlace, calorias)
+
+        ejercicio = self.session.query(Ejercicio).filter(Ejercicio.nombre == nombre).first().__dict__
+        self.assertEqual(ejercicio["id"], ejercicio_bd["id"])
+        self.assertEqual(ejercicio["nombre"], nombre)
+        self.assertEqual(ejercicio["descripcion"], description)
+        self.assertEqual(ejercicio["youtube"], enlace)
+        self.assertEqual(ejercicio["calorias"], calorias)
+
+    def test_no_eliminar_ejercicio_asociado_a_entrenamiento(self):
+        indice_ejercicio = 0
+        ejercicio = self.ejercicios_data_sorted[indice_ejercicio]
+        ejercicio_bd = self.session.query(Ejercicio).filter(Ejercicio.nombre == ejercicio[0]).first()
+        ejercicio_id = ejercicio_bd.id
+
+        persona = self.session.query(Persona).order_by(asc("nombre")).limit(1).first()
+
+        self.session.add(EjercicioEntrenado(
+            persona_id=persona.id,
+            ejercicio_id=ejercicio_id,
+            fecha="2023-09-21",
+            repeticiones=100,
+            tiempo="00:30:00",
+        ))
+        self.session.commit()
+
+        result = self.logica.eliminar_ejercicio(indice_ejercicio)
+        ejercicio_no_eliminado = self.session.query(Ejercicio).filter(Ejercicio.id == ejercicio_id).first()
+
+        self.assertEqual(result, False)
+        self.assertEqual(ejercicio_bd.id, ejercicio_no_eliminado.id)
+        self.assertEqual(ejercicio_bd.nombre, ejercicio_no_eliminado.nombre)
+
+    def test_eliminar_ejercicio(self):
+        indice_ejercicio = 0
+        ejercicio = self.ejercicios_data_sorted[indice_ejercicio]
+        ejercicio_bd = self.session.query(Ejercicio).filter(Ejercicio.nombre == ejercicio[0]).first()
+        ejercicio_id = ejercicio_bd.id
+
+        persona = self.session.query(Persona).order_by(asc("nombre")).limit(1).first()
+
+        self.session.add(EjercicioEntrenado(
+            persona_id=persona.id,
+            ejercicio_id=ejercicio_id,
+            fecha="2023-09-21",
+            repeticiones=100,
+            tiempo="00:30:00",
+        ))
+        self.session.commit()
+
+        self.session.query(EjercicioEntrenado).filter(EjercicioEntrenado.ejercicio_id == ejercicio_id).delete()
+        self.session.commit()
+
+        result = self.logica.eliminar_ejercicio(indice_ejercicio)
+        rows = self.session.query(Ejercicio).filter(Ejercicio.id == ejercicio_id).all()
+
+        self.assertEqual(result, True)
+        self.assertEqual(len(rows), 0)
 
     def test_editar_entrenamiento_tiempo(self):
         id_entrenamiento = len(self.entrenamientos_data_sorted) - 1

@@ -83,7 +83,7 @@ class FachadaEnForma:
         '''
         raise NotImplementedError("Método no implementado")
 
-    def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias):
+    def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias, id_ejercicio):
         ''' Valida que un ejercicio se pueda crear o editar
         Parámetros:
             nombre (string): El nombre del ejercicio
