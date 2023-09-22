@@ -752,3 +752,40 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         ).order_by(desc("id")).first().__dict__
 
         self.assertEqual(entrenamiento["ejercicio_id"], ejercicio_a_editar["ejercicio"].id)
+
+    def test_editar_entrenamiento(self):
+        id_entrenamiento = len(self.entrenamientos_data_sorted) - 1
+        tiempo_a_editar = "00:20:00"
+        repeticiones_a_editar = 50
+        fecha_a_editar = (datetime.datetime.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        ejercicio_a_editar = self.agregar_ejercicio(
+            self.data_faker.unique.name(),
+            self.data_faker.text(max_nb_chars=250),
+            "https://www.youtube.com/watch?" + self.data_faker.name(),
+            self.data_faker.random_int(10, 1000)
+        )
+
+        editar_entrenamiento_data = self.obtener_informacion_para_editar_entrenamiento(id_entrenamiento)
+        entrenamiento = editar_entrenamiento_data["entrenamiento"]
+        persona = editar_entrenamiento_data["persona"]
+        ejercicio = editar_entrenamiento_data["ejercicio"]
+
+        self.assertEqual(entrenamiento["ejercicio_id"], ejercicio.id)
+
+        self.logica.editar_entrenamiento(
+            id_entrenamiento,
+            persona.__dict__,
+            ejercicio_a_editar["ejercicio"].nombre,
+            fecha_a_editar,
+            repeticiones_a_editar,
+            tiempo_a_editar
+        )
+
+        entrenamiento = self.session.query(EjercicioEntrenado).filter(
+            EjercicioEntrenado.id == entrenamiento["id"],
+        ).order_by(desc("id")).first().__dict__
+
+        self.assertEqual(entrenamiento["ejercicio_id"], ejercicio_a_editar["ejercicio"].id)
+        self.assertEqual(entrenamiento["fecha"], fecha_a_editar)
+        self.assertEqual(entrenamiento["repeticiones"], repeticiones_a_editar)
+        self.assertEqual(entrenamiento["tiempo"], tiempo_a_editar)
