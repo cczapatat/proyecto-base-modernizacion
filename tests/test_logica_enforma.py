@@ -621,3 +621,20 @@ class LogicaEnFormaTestCase(unittest.TestCase):
         ).order_by(desc("id")).first().__dict__
 
         self.assertEqual(entrenamiento["tiempo"], tiempo_a_editar)
+
+    def test_editar_entrenamiento_repeticiones(self):
+        id_entrenamiento = len(self.entrenamientos_data_sorted) - 1
+        repeticiones_a_editar = 50
+        persona = self.obtener_persona_crear_entrenamiento()
+        ejercicio = self.obtener_ejercicio_crear_entrenamiento()
+        entrenamiento = self.session.query(EjercicioEntrenado).filter(EjercicioEntrenado.ejercicio_id == self.entrenamientos_data_sorted[id_entrenamiento][1]).first().__dict__
+
+        self.assertEqual(entrenamiento["repeticiones"], self.entrenamientos_data_sorted[id_entrenamiento][5])
+
+        self.logica.editar_entrenamiento(id_entrenamiento, persona.__dict__, ejercicio.nombre, entrenamiento["fecha"],  repeticiones_a_editar,  entrenamiento["tiempo"])
+
+        entrenamiento = self.session.query(EjercicioEntrenado).filter(
+            EjercicioEntrenado.id == entrenamiento["id"],
+        ).order_by(desc("id")).first().__dict__
+
+        self.assertEqual(entrenamiento["repeticiones"], repeticiones_a_editar)
