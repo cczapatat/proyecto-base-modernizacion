@@ -1,10 +1,9 @@
 name: Merge sobre Main.
 on:
-  push:
-    branches:
-      - 'develop'
-    tags:
-      - 'dev-**'
+  workflow_run:
+    workflows: ["Merge sobre Develop."]
+    types:
+      - completed
 jobs:
   test:
     name: Test
