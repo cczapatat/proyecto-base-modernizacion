@@ -23,6 +23,8 @@ jobs:
       - name: Save log
         id: log
         run: echo "::set-output name=respuesta::$(git log -1)"
+      - name: Echo Log.Respuesta
+        run: echo "${{ steps.log.outputs.respuesta  }}"
 
   create_and_push_relase_branch:
     name: Push and Rebase on Branch
