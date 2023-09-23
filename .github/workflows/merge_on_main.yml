@@ -22,7 +22,7 @@ jobs:
           git config user.email "c.paradac@uniandes.edu.co"
       - name: Save log
         id: log
-        run: echo "::set-output name=respuesta::$(git log -1)"
+        run: echo "::set-output name=respuesta::$(git log --pretty=format:%s -1)"
       - name: Echo Log.Respuesta
         run: echo "${{ steps.log.outputs.respuesta  }}"
 
