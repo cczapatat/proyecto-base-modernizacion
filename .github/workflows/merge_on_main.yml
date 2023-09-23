@@ -19,6 +19,12 @@ jobs:
         run: |
           git config user.name "cparadac"
           git config user.email "c.paradac@uniandes.edu.co"
+      - name: Get Develop
+        run: |
+          git fetch
+          git checkout develop
+          git branch --show-current
+          git pull
       - name: test echo
         run: echo "Test Echo ${{ github.event.head_commit.message }}"
 
