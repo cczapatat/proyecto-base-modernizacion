@@ -24,8 +24,17 @@ class LogicaEnForma(FachadaEnForma):
     def es_enlace_youtube(self, enlace):
         return enlace.startswith("https://www.youtube.com/watch?")
 
-    def dar_ejercicios_por_nombre(self, nombre_ejercicio):
-        return session.query(Ejercicio).filter(Ejercicio.nombre == nombre_ejercicio).all()
+    def dar_ejercicios_por_nombre(self, nombre_ejercicio, id_ejercicio):
+        if id_ejercicio < 0:
+            return session.query(Ejercicio).filter(Ejercicio.nombre == nombre_ejercicio).all()
+        else:
+            ejercicios = self.dar_ejercicios()
+            ejercicio = ejercicios[id_ejercicio]
+
+            return session.query(Ejercicio).filter(
+                Ejercicio.id != ejercicio["id"],
+                Ejercicio.nombre == nombre_ejercicio
+            ).all()
 
     def dar_ejercicio_por_nombre(self, nombre_ejercicio):
         return session.query(Ejercicio).filter(Ejercicio.nombre == nombre_ejercicio).first()
@@ -66,7 +75,25 @@ class LogicaEnForma(FachadaEnForma):
 
         return clasificacion
 
-    def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias):
+    def dar_ejercicios_entrenado_por_persona_id_entrenamiento_indice(self, persona_id, entrenamiento_indice):
+        ejercicios_entrenados = self.dar_ejercicio_entrenados_por_persona_id(persona_id)
+        result = []
+        for ejercicio_entrenado in ejercicios_entrenados:
+            result.append(self.mapear_objeto_entrenamiento(ejercicio_entrenado))
+
+        ejercicio_entrenado_sorted = sorted(
+            result,
+            key=lambda entrenamiento: (entrenamiento["fechaDate"], entrenamiento["ejercicio"]),
+            reverse=True,
+        )
+
+        ejercicio_entrenado = next(
+            filter(lambda item: item.EjercicioEntrenado.id == ejercicio_entrenado_sorted[entrenamiento_indice]["id"],
+                   ejercicios_entrenados))
+
+        return ejercicio_entrenado[0]
+
+    def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias, id_ejercicio):
         error = ""
         calorias_int = 0
 
@@ -100,7 +127,7 @@ class LogicaEnForma(FachadaEnForma):
         if not error and calorias_int <= 0:
             error = "Error, el campo calorias debe ser mayor a cero"
 
-        ejercicios_por_nombre = self.dar_ejercicios_por_nombre(nombre)
+        ejercicios_por_nombre = self.dar_ejercicios_por_nombre(nombre, id_ejercicio)
 
         if not error and len(ejercicios_por_nombre) > 0:
             error = "Error, el ejericio " + nombre + " ya existe"
@@ -137,8 +164,10 @@ class LogicaEnForma(FachadaEnForma):
 
     def dar_persona(self, id_persona):
         personas = self.dar_personas()
+        persona = personas[id_persona]
+        persona["indice"] = id_persona
 
-        return personas[id_persona]
+        return persona
 
     def dar_ejercicio_entrenados_por_persona_id(self, person_id):
         return ((session.query(EjercicioEntrenado, Ejercicio)
@@ -260,3 +289,44 @@ class LogicaEnForma(FachadaEnForma):
                 "entrenamientos": entrenamientos_data
             }
         }
+    def editar_ejercicio(self, id_ejercicio, nombre, descripcion, enlace, calorias):
+        ejercicios = self.dar_ejercicios()
+        ejercicio = ejercicios[id_ejercicio]
+
+        ejercicio_bd = session.query(Ejercicio).filter(Ejercicio.id == ejercicio["id"]).first()
+        ejercicio_bd.nombre = nombre
+        ejercicio_bd.descripcion = descripcion
+        ejercicio_bd.youtube = enlace
+        ejercicio_bd.calorias = calorias
+        session.commit()
+
+        return True
+
+    def eliminar_ejercicio(self, id_ejercicio):
+        ejercicios = self.dar_ejercicios()
+        ejercicio_id = ejercicios[id_ejercicio]["id"]
+
+        entrenamientos = session.query(EjercicioEntrenado).filter(EjercicioEntrenado.ejercicio_id == ejercicio_id).all()
+
+        if len(entrenamientos) == 0:
+            session.query(Ejercicio).filter(Ejercicio.id == ejercicio_id).delete()
+            session.commit()
+            return True
+
+        return False
+
+    def editar_entrenamiento(self, id_entrenamiento, persona, ejercicio, fecha, repeticiones, tiempo):
+        entrenamiento = self.dar_ejercicios_entrenado_por_persona_id_entrenamiento_indice(
+            persona["id"],
+            id_entrenamiento
+        )
+        ejercicio_por_nombre = self.dar_ejercicio_por_nombre(ejercicio)
+
+        entrenamiento.tiempo = tiempo
+        entrenamiento.repeticiones = repeticiones
+        entrenamiento.fecha = fecha
+        entrenamiento.ejercicio_id = ejercicio_por_nombre.id
+
+        session.commit()
+
+        return True

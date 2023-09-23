@@ -64,7 +64,7 @@ class LogicaMock(FachadaEnForma):
     def dar_ejercicios(self):
         return self.ejercicios.copy()
 
-    def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias):
+    def validar_crear_editar_ejercicio(self, nombre, descripcion, enlace, calorias, id_ejercicio):
         return ""
 
     def crear_ejercicio(self, nombre, descripcion, enlace, calorias):
