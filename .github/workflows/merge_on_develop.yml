@@ -77,19 +77,3 @@ jobs:
           source-branch: ${{ github.ref }}
           target-branch: develop
           commit-message: "Merge to Develop - ${{ github.ref_name }} ${{ needs.push_and_rebase_on_branch.outputs.release }}"
-      - name: Checkout de repositorio
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Setup user git
-        run: |
-          git config user.name "cczapatat"
-          git config user.email "c.zapatat@uniandes.edu.co"
-      - name: Crear tag pre-release sobre develop
-        run: |
-          git fetch
-          git checkout develop
-          git branch --show-current
-          git pull
-          git tag dev-$(git rev-parse --short HEAD) HEAD -m "Version $(git rev-parse --short HEAD) ${{ needs.push_and_rebase_on_branch.outputs.release }}"
-          git push origin dev-$(git rev-parse --short HEAD)
