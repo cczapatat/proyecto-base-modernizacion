@@ -61,7 +61,6 @@ jobs:
         id: mensaje_merge
         run: echo "::set-output name=respuesta::[Release]"
 
-
   merge_on_develop:
     name: Merge on Develop
     needs: push_and_rebase_on_branch

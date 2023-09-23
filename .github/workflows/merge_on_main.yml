@@ -5,32 +5,28 @@ on:
     types:
       - completed
 jobs:
-  test:
-    name: Test
+  validar_develop:
+    name: Validar Develop Branch
     runs-on: ubuntu-latest
+    outputs:
+      correcto: ${{ steps.version_detalle.outputs.respuesta }}
     steps:
-      - name: otro test
-        run: echo "Run TEST"
       - name: Checkout de repositorio
         uses: actions/checkout@v2
         with:
+          ref: 'develop'
           fetch-depth: 0
       - name: Setup user git
         run: |
           git config user.name "cparadac"
           git config user.email "c.paradac@uniandes.edu.co"
-      - name: Get Develop
-        run: |
-          git fetch
-          git checkout develop
-          git branch --show-current
-          git pull
       - name: test echo
-        run: echo "Test Echo ${{ github.event.head_commit.message }}"
+        run: echo "::set-output name=respuesta::$(git log -1)"
 
   create_and_push_relase_branch:
     name: Push and Rebase on Branch
-    if: ${{ contains(github.event.head_commit.message, '[Release]') }}
+    needs: validar_develop
+    if: ${{ needs.validar_develop.outputs.correcto == '[Release]' }}
     runs-on: ubuntu-latest
     outputs:
       salida: ${{ steps.resultado_pruebas_exitoso.outputs.respuesta }}
@@ -39,6 +35,7 @@ jobs:
       - name: Checkout de repositorio
         uses: actions/checkout@v2
         with:
+          ref: 'develop'
           fetch-depth: 0
       - name: Setup user git
         run: |
