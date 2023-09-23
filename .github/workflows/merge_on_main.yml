@@ -11,6 +11,16 @@ jobs:
     steps:
       - name: otro test
         run: echo "Run TEST"
+      - name: Checkout de repositorio
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup user git
+        run: |
+          git config user.name "cparadac"
+          git config user.email "c.paradac@uniandes.edu.co"
+      - name: test echo
+        run: echo "Test Echo ${{ github.event.head_commit.message }}"
 
   create_and_push_relase_branch:
     name: Push and Rebase on Branch
