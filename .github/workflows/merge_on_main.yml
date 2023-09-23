@@ -27,7 +27,7 @@ jobs:
   create_and_push_relase_branch:
     name: Push and Rebase on Branch
     needs: validar_develop
-    if: ${{ needs.validar_develop.outputs.correcto == '[Release]' }}
+    if: ${{ contains(needs.validar_develop.outputs.correcto, '[Release]') }}
     runs-on: ubuntu-latest
     outputs:
       salida: ${{ steps.resultado_pruebas_exitoso.outputs.respuesta }}
