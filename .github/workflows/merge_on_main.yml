@@ -9,7 +9,7 @@ jobs:
     name: Validar Develop Branch
     runs-on: ubuntu-latest
     outputs:
-      correcto: ${{ steps.version_detalle.outputs.respuesta }}
+      correcto: ${{ steps.log.outputs.respuesta }}
     steps:
       - name: Checkout de repositorio
         uses: actions/checkout@v2
@@ -21,6 +21,7 @@ jobs:
           git config user.name "cparadac"
           git config user.email "c.paradac@uniandes.edu.co"
       - name: Save log
+        id: log
         run: echo "::set-output name=respuesta::$(git log -1)"
 
   create_and_push_relase_branch:
